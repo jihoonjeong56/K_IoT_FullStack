@@ -1,7 +1,6 @@
 import axios, { type InternalAxiosRequestConfig } from "axios";
 
-const API_BASE =
-  import.meta.env.VITE_API_BASE || "http://localhost:8080/api/v1";
+const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:8080";
 
 export const publicApi = axios.create({
   baseURL: API_BASE,
@@ -12,9 +11,7 @@ export const publicApi = axios.create({
   },
   withCredentials: true,
 });
-export const privateApi = axios.create({
-  
-});
+export const privateApi = axios.create({});
 
 privateApi.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {

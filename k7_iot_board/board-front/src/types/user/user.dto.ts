@@ -1,9 +1,13 @@
 //! user.dto.ts
-export interface UserCreateReq {}
 
-export interface UserDetailResDto {}
+// DTO request 타입: 백엔드로 보내는 Request Dto
+export interface UserCreateRequest {}
 
-export interface UserListItemResDto {}
+// 단일 유저 상세 정보 (GET /users/:userId)
+export interface UserDetailResponse {}
 
-export type UserListResponse = UserListItemResDto[];
- 
+// 리스트 항목
+export interface UserListItemResponse {}
+
+// 리스트 응답 데이터
+export type UserListResponse = UserListItemResponse[];

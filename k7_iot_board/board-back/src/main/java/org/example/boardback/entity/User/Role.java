@@ -1,4 +1,4 @@
-package org.example.boardback.entity.User;
+package org.example.boardback.entity.user;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;

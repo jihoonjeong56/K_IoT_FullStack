@@ -1,14 +1,11 @@
 package org.example.boardback.dto.board.file;
 
-
 import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
 import org.example.boardback.entity.file.FileInfo;
 
 @Getter
 @Builder
-@Setter
 public class BoardFileListDto {
     private Long fileId;
     private String originalName;
@@ -17,8 +14,8 @@ public class BoardFileListDto {
     private Long fileSize;
     private String downloadUrl;
 
-    public static BoardFileListDto fromEntity(FileInfo fileInfo, String baseDownLoadUrl){
-        if(fileInfo == null) return null;
+    public static BoardFileListDto fromEntity(FileInfo fileInfo, String baseDownLoadUrl) {
+        if (fileInfo == null) return null;
 
         return BoardFileListDto.builder()
                 .fileId(fileInfo.getId())

@@ -1,5 +1,5 @@
 import BoardEditor from "./components/BoardEditor";
-import BoardFileList from "./components/BoardFIleList";
+import BoardFileList from "./components/BoardFileList";
 import ProfileUpload from "./components/ProfileUpload";
 
 function App() {

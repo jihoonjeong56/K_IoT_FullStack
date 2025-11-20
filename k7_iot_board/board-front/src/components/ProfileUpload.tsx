@@ -1,11 +1,8 @@
-import React from 'react'
+import React from "react";
 
-// ! 프로필 업로드
-
+//! 프로필 업로드
 function ProfileUpload() {
-  return (
-    <div>ProfileUpload</div>
-  )
+  return <div>ProfileUpload</div>;
 }
 
-export default ProfileUpload
+export default ProfileUpload;

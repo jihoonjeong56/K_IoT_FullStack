@@ -32,5 +32,4 @@ public class FileInfo {
 
     @CreationTimestamp
     private LocalDateTime createdAt;
-
 }

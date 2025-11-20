@@ -5,7 +5,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.example.boardback.entity.User.User;
+import org.example.boardback.entity.user.User;
 import org.example.boardback.entity.base.BaseTimeEntity;
 import org.example.boardback.entity.board.like.BoardLike;
 import org.example.boardback.entity.comment.Comment;

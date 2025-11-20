@@ -5,8 +5,8 @@ import { BASE } from "../common/base.path";
 const BOARD_PREFIX = `${BASE}/boards`;
 
 export const BOARD_PATH = {
-  //? cf) SpringBoot 의 controller는 class 파일 단위의 Mapping값 설정 가능
-  //    VS Reat HTTP 의 경로는 완전한 경로값을 전달
+  //? cf) SpringBoot의 controller는 class 파일 단위의 Mapping값 설정 가능
+  //      VS React HTTP의 경로는 완전한 경로값을 전달
   ROOT: BOARD_PREFIX,
 
   LIST: BOARD_PREFIX,
@@ -30,12 +30,12 @@ export const BOARD_PATH = {
   // 조회수 증가
   VIEW: (boardId: number) => `${BOARD_PREFIX}/${boardId}/view`,
 
-  // 좋아요 기능
+  // 좋아요
   LIKE: (boardId: number) => `${BOARD_PREFIX}/${boardId}/like`,
   LIKE_CANCEL: (boardId: number) => `${BOARD_PREFIX}/${boardId}/like/cancel`,
   LIKE_COUNT: (boardId: number) => `${BOARD_PREFIX}/${boardId}/like/count`,
 
-  // 게시글 고정(pin)
+  // 게시글 고정 (pin)
   PIN: (boardId: number) => `${BOARD_PREFIX}/${boardId}/pin`,
   UNPIN: (boardId: number) => `${BOARD_PREFIX}/${boardId}/unpin`,
   PINNED_LIST: `${BOARD_PREFIX}/pinned`,
@@ -43,7 +43,7 @@ export const BOARD_PATH = {
   // 신고
   REPORT: (boardId: number) => `${BOARD_PREFIX}/${boardId}/report`,
 
-  // 임시저장
+  // 임시 저장
   DRAFT: `${BOARD_PREFIX}/draft`,
   DRAFT_BY_ID: (draftId: number) => `${BOARD_PREFIX}/draft/${draftId}`,
 
@@ -51,5 +51,5 @@ export const BOARD_PATH = {
   STATS: `${BOARD_PREFIX}/stats`,
   STATS_DAILY: `${BOARD_PREFIX}/stats/daily`,
   STATS_MONTHLY: `${BOARD_PREFIX}/stats/monthly`,
-  STATS_GENDER: `${BOARD_PREFIX}/gender`,
+  STATS_GENDER: `${BOARD_PREFIX}/stats/gender`,
 };

@@ -1,4 +1,4 @@
-//!user.password.path.ts
+//! user.password.path.ts
 
 import { BASE } from "../common/base.path";
 

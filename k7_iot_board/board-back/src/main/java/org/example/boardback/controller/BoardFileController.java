@@ -3,11 +3,13 @@ package org.example.boardback.controller;
 import lombok.RequiredArgsConstructor;
 import org.example.boardback.common.apis.BoardApi;
 import org.example.boardback.dto.board.file.BoardFileListDto;
+import org.example.boardback.dto.board.file.BoardFileUpdateRequestDto;
 import org.example.boardback.entity.file.FileInfo;
 import org.example.boardback.service.impl.BoardFileServiceImpl;
 import org.springframework.core.io.PathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -43,7 +45,7 @@ public class BoardFileController {
         return ResponseEntity.ok(files); // 200 OK
     }
 
-    @GetMapping("/file/download/{fileId}")
+    @GetMapping("/files/{fileId}/download")
     public ResponseEntity<Resource> download(@PathVariable Long fileId) {
         // service 에서 파일 정보 조회
         FileInfo info = boardFileService.getFileInfo(fileId);
@@ -63,9 +65,25 @@ public class BoardFileController {
                 .body(resource);
     }
 
-    @DeleteMapping("/file/{fileId}")
+    @DeleteMapping("/files/{fileId}")
     public ResponseEntity<Void> deleteBoardFile(@PathVariable Long fileId) {
         boardFileService.deleteBoardFile(fileId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping(
+            value = BoardApi.ID_ONLY + "/files",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
+    public ResponseEntity<?> updateBoardFiles(
+            @PathVariable Long boardId,
+            // ModelAttribute
+            // : 쿼리 파라미터나 HTML 폼 데이터를 Java 객체로 바인딩할 때 사용
+            // MultipartFile + List<Long> 조합 시 JSON + 파일 혼합이 불가능
+            //      >> FormData 기반 요청에는 @RequestBody 사용 불가
+            //      >> @ModelAttribute가 가장 안정적인 방식
+            @ModelAttribute BoardFileUpdateRequestDto dto) {
+        boardFileService.updateBoardFiles(boardId, dto);
         return ResponseEntity.noContent().build();
     }
 }

@@ -38,7 +38,7 @@ CREATE TABLE file_infos (
     DEFAULT CHARSET = utf8mb4
     COLLATE = utf8mb4_unicode_ci
     COMMENT = '파일 정보 테이블';
-
+select * from file_infos;
 # === USERS (사용자) === #
 
 CREATE TABLE users (

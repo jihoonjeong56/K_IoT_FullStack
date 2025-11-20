@@ -1,6 +1,5 @@
 // board.api.ts
 
-import type { ApiResponse } from "@/types/common/ApiResponse";
 import { publicApi } from "../common/axiosInstance";
 import { BOARD_FILE_PATH } from "./board.file.path";
 import type { BoardListResponse } from "@/types/board/board.dto";
@@ -28,7 +27,7 @@ export const boardApi = {
     return res.data;
   },
   DELETE_BOARD_FILE: async (fileId: number): Promise<void> => {
-    await publicApi.delete(BOARD_FILE_PATH.FILES_BY_ID(fileId));
+    await publicApi.delete(BOARD_FILE_PATH.FILE_BY_ID(fileId));
   },
   UPDATE_BOARD_FILES: async (boardId: number, formData: FormData) => {
     const res = await publicApi.put<void>(

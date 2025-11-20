@@ -2,7 +2,7 @@ package org.example.boardback.service.impl;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.example.boardback.entity.User.User;
+import org.example.boardback.entity.user.User;
 import org.example.boardback.entity.file.FileInfo;
 import org.example.boardback.repository.file.FileInfoRepository;
 import org.example.boardback.repository.user.UserRepository;

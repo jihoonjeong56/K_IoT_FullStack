@@ -13,13 +13,22 @@ export const userApi = {
     const res = await privateApi.get<ResponseDto<UserDetailResponse>>(
       USER_PATH.BY_ID(userId)
     );
-    return res.data.data;
+    if (res.data.data) {
+      return res.data.data;
+    } else {
+      throw new Error("사용자 상세 데이터가 존재하지 않습니다.");
+    }
   },
 
   getUserList: async (): Promise<UserListResponse> => {
     const res = await privateApi.get<ResponseDto<UserListResponse>>(
       USER_PATH.LIST
     );
-    return res.data.data;
+
+    if (res.data.data) {
+      return res.data.data;
+    } else {
+      throw new Error("사용자 응답 데이터가 존재하지 않습니다.");
+    }
   },
 };

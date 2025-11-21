@@ -12,6 +12,10 @@ export const authApi = {
       AUTH_PATH.LOGIN,
       req
     );
-    return res.data.data;
+    if (res.data.data) {
+      return res.data.data;
+    } else {
+      throw new Error("로그인 응답 데이터가 존재하지 않습니다.");
+    }
   },
 };

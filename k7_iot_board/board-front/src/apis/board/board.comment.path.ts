@@ -6,6 +6,8 @@ const BOARD_PREFIX = `${BASE}/boards`;
 
 export const BOARD_COMMENT_PATH = {
   COMMENTS: (boardId: number) => `${BOARD_PREFIX}/${boardId}/comments`,
-  COMMENT_BY_ID: (boardId: number, commentId: number) =>
-    `${BOARD_PREFIX}/${boardId}/comments/${commentId}`,
-};
+  COMMENT_BY_ID: (
+    boardId: number,
+    commentId: number
+  ) => `${BOARD_PREFIX}/${boardId}/comments/${commentId}`,
+}

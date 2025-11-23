@@ -68,9 +68,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         chain.doFilter(request, response);
     }
 
-    /**
-     * Authorization Header → Bearer 토큰 추출
-     */
+    /** Authorization Header → Bearer 토큰 추출 */
     private String resolveToken(HttpServletRequest request) {
         String header = request.getHeader("Authorization");
 

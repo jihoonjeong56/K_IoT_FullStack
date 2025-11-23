@@ -5,16 +5,17 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.example.boardback.entity.user.User;
 import org.example.boardback.entity.base.BaseTimeEntity;
 import org.example.boardback.entity.board.like.BoardLike;
 import org.example.boardback.entity.comment.Comment;
+import org.example.boardback.entity.user.User;
 
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "boards",
+@Table(
+        name = "boards",
         indexes = {
                 @Index(name = "idx_boards_created_at", columnList = "created_at"),
                 @Index(name = "idx_boards_updated_at", columnList = "updated_at"),
@@ -23,16 +24,15 @@ import java.util.Set;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Board extends BaseTimeEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", updatable = false)
     private Long id;
 
-    @Column(name = "title", nullable = false, length = 150)
+    @Column(nullable = false, length = 150)
     private String title;
 
     @Lob
-    @Column(name = "content", nullable = false)
+    @Column(nullable = false)
     private String content;
 
     @Column(name = "view_count", nullable = false)
@@ -55,18 +55,10 @@ public class Board extends BaseTimeEntity {
     @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Comment> comments = new HashSet<>();
 
-    // 편의 메서드 //
-    public void increaseViewCount() {
-        this.viewCount++;
-    }
-
-    public void pin() {
-        this.pinned = true;
-    }
-
-    public void unpin() {
-        this.pinned = false;
-    }
+    // == 편의 메서드 == //
+    public void increaseViewCount() { this.viewCount++; }
+    public void pin() { this.pinned = true; }
+    public void unpin() { this.pinned = false; }
 
     @Builder
     public Board(String title, String content, User writer, BoardCategory category) {
@@ -81,5 +73,4 @@ public class Board extends BaseTimeEntity {
         this.content = content;
         this.category = category;
     }
-
 }

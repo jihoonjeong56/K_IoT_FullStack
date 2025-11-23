@@ -1,5 +1,6 @@
 // board.api.ts
 
+import type { ResponseDto } from "@/types/common/ResponseDto";
 import { publicApi } from "../common/axiosInstance";
 import { BOARD_FILE_PATH } from "./board.file.path";
 import type { BoardListResponse } from "@/types/board/board.dto";
@@ -14,10 +15,10 @@ export const boardApi = {
     return res.data;
   },
   getFilesByBoard: async (boardId: number) => {
-    const res = await publicApi.get<BoardListResponse>(
+    const res = await publicApi.get<ResponseDto<BoardListResponse>>(
       BOARD_FILE_PATH.FILES_BY_BOARD(boardId)
     );
-    console.log("data: ", res.data);
+    
     return res.data;
   },
   DOWNLOAD: async (fileId: number): Promise<Blob> => {

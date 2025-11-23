@@ -5,6 +5,8 @@ import org.springframework.http.HttpStatus;
 
 @Getter
 public enum ErrorCode {
+    SUCCESS(HttpStatus.OK, "S000", "성공적으로 완료되었습니다.", "success"),
+    CREATED(HttpStatus.CREATED, "S001", "데이터 생성이 성공적으로 완료되었습니다.","created successfully"),
 
     // ===========================
     // Common Errors (Cxxx)
@@ -25,6 +27,7 @@ public enum ErrorCode {
     ACCESS_DENIED(HttpStatus.FORBIDDEN, "A003", "접근 권한이 없습니다.", "Access denied"),
     TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "A004", "토큰이 만료되었습니다.", "Token expired"),
     TOKEN_INVALID(HttpStatus.UNAUTHORIZED, "A005", "유효하지 않은 토큰입니다.", "Invalid token"),
+    PASSWORD_CONFIRM_MISMATCH(HttpStatus.BAD_REQUEST, "A006", "비밀번호와 비밀번호 확인이 일치하지 않습니다.", "Password mismatch"),
 
     // ===========================
     // User (Uxxx)

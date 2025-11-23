@@ -21,12 +21,12 @@ export const BOARD_FILE_PATH = {
 
   //? 4. 파일 삭제: DELETE - /boards/files/{fileId}
   // : 개별 파일 삭제
-
+  
   //# 개별 파일 리소스
-  FILE_BY_ID: (fileId: number) => `${BOARD_FILE_PREFIX}/files/${fileId}`,
+  FILE_BY_ID: (fileId: number) => `${BOARD_FILE_PREFIX}/files/${fileId}`
 
   //^ cf) download와 delete는 boardId 없이 fileId 기준으로 직행하는 형태
 
   //? 5. 파일 수정(추가/삭제 혼합): PUT - /boards/{boardId}/files
   // : 게시글 첨부파일 목록 변경
-};
+}

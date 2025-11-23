@@ -301,4 +301,3 @@ INSERT INTO board_drafts (title, content, user_id, created_at, updated_at) VALUE
 ('임시글10', '초안 테스트', 11, NOW(), NOW());
 
 SET FOREIGN_KEY_CHECKS = 1;
-

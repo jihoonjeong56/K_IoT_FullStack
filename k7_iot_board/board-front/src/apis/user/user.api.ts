@@ -16,7 +16,7 @@ export const userApi = {
     if (res.data.data) {
       return res.data.data;
     } else {
-      throw new Error("사용자 상세 데이터가 존재하지 않습니다.");
+      throw new Error("해당 id의 user가 존재하지 않습니다.");
     }
   },
 
@@ -24,11 +24,10 @@ export const userApi = {
     const res = await privateApi.get<ResponseDto<UserListResponse>>(
       USER_PATH.LIST
     );
-
     if (res.data.data) {
       return res.data.data;
     } else {
-      throw new Error("사용자 응답 데이터가 존재하지 않습니다.");
+      throw new Error("사용자 리스트를 불러올 수 없습니다.");
     }
   },
 };

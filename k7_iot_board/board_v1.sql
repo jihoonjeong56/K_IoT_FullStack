@@ -1,4 +1,4 @@
-#DROP DATABASE IF EXISTS `board_v1`; 
+DROP DATABASE IF EXISTS `board_v1`; 
 CREATE DATABASE IF NOT EXISTS `board_v1`
 	CHARACTER SET utf8mb4
     COLLATE utf8mb4_general_ci;
@@ -8,7 +8,7 @@ SET NAMES utf8mb4;				# 클라이언트와 MySQL 서버 간의 문자 인코딩 
 SET FOREIGN_KEY_CHECKS = 0;		# 외래 키 제약 조건 검사를 일시적으로 끄는 설정
 
 # === 기존 테이블 제거 === #
-DROP TABLE IF EXISTS board_files;
+DROP TABLE IF EXISTS post_files;
 DROP TABLE IF EXISTS file_infos;
 
 DROP TABLE IF EXISTS comments;
@@ -38,7 +38,7 @@ CREATE TABLE file_infos (
     DEFAULT CHARSET = utf8mb4
     COLLATE = utf8mb4_unicode_ci
     COMMENT = '파일 정보 테이블';
-select * from file_infos;
+
 # === USERS (사용자) === #
 
 CREATE TABLE users (
@@ -172,8 +172,6 @@ CREATE TABLE board_files (
     DEFAULT CHARSET = utf8mb4
     COLLATE = utf8mb4_unicode_ci
     COMMENT = '게시글 파일 매핑 테이블';
-    
-    select * from board_files;
     
 # === Comment (게시글 댓글) === #
 CREATE TABLE comments (

@@ -1,5 +1,8 @@
+import { publicApi } from "@/apis/common/axiosInstance";
+
 // 공통 Response 형식
 export interface ResponseDto<T> {
+  map(arg0: (file: any) => any): import("react").SetStateAction<number[]>;
   success: boolean; // 성공 여부
   message: string; // 메시지
   data?: T | null; // 응답 데이터 (성공 시)

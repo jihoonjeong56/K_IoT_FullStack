@@ -218,7 +218,7 @@ public class BoardController {
     // 8. 통계 (Stats)
     // ============================================================
 
-    @GetMapping(BoardApi.STATS_DAIRY)
+    @GetMapping(BoardApi.STATS_DAILY)
     public ResponseEntity<ResponseDto<DailyBoardStatResponseDto>> dailyStats() {
         ResponseDto<DailyBoardStatResponseDto> data = boardStatService.dailyStats();
         return ResponseEntity.ok(data);

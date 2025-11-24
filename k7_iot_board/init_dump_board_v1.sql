@@ -43,47 +43,53 @@ CREATE TABLE file_infos (
 
 # === USERS (사용자) === #
 CREATE TABLE users (
-	id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+
     username VARCHAR(50) NOT NULL COMMENT '로그인 ID',
-    password VARCHAR(255) NOT NULL COMMENT 'Bcrypt 암호화 비밀번호',
+    password VARCHAR(255) NULL COMMENT '로컬 계정만 사용(소셜 계정은 NULL)',
     email VARCHAR(255) NOT NULL COMMENT '사용자 이메일',
     nickname VARCHAR(50) NOT NULL COMMENT '닉네임',
-    
+
     gender VARCHAR(10) COMMENT '성별',
-    profile_file_id BIGINT NULL COMMENT '프로필 이미지 파일 ID',   -- 추가됨
-    
+    profile_file_id BIGINT NULL COMMENT '프로필 이미지 파일 ID',
+
+    provider VARCHAR(20) NOT NULL DEFAULT 'LOCAL' COMMENT 'LOCAL/GOOGLE/KAKAO/NAVER',
+    provider_id VARCHAR(100) DEFAULT NULL COMMENT '소셜 Provider Unique ID',
+    email_verified BOOLEAN NOT NULL DEFAULT FALSE COMMENT '이메일 인증 여부',
+
     created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     updated_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
-    
+
     CONSTRAINT `uk_users_username` UNIQUE(username),
     CONSTRAINT `uk_users_email` UNIQUE(email),
     CONSTRAINT `uk_users_nickname` UNIQUE(nickname),
+    CONSTRAINT `uk_users_provider_provider_id` UNIQUE(provider, provider_id),
+
     CONSTRAINT `chk_users_gender` CHECK(gender IN ('MALE', 'FEMALE', 'OTHER', 'NONE')),
-    CONSTRAINT `fk_users_profile_file` FOREIGN KEY (profile_file_id) REFERENCES file_infos(id) ON DELETE SET NULL  -- FK 추가됨
+    CONSTRAINT `chk_users_provider` CHECK(provider IN ('LOCAL', 'GOOGLE', 'KAKAO', 'NAVER')),
+
+    CONSTRAINT `fk_users_profile_file`
+        FOREIGN KEY (profile_file_id) REFERENCES file_infos(id) ON DELETE SET NULL
 )
-	ENGINE=InnoDB
-    DEFAULT CHARSET = utf8mb4
-    COLLATE = utf8mb4_unicode_ci
-    COMMENT = '사용자 기본 정보 테이블';
+ENGINE=InnoDB
+DEFAULT CHARSET=utf8mb4
+COLLATE=utf8mb4_unicode_ci
+COMMENT='사용자 기본 정보 테이블';
 
 -- Seed Users
-INSERT INTO users (username, password, email, nickname, gender, created_at, updated_at) VALUES
-('admin', 'encrypted_pw', 'admin@site.com', '관리자', 'MALE', NOW(), NOW()),
-('user01', 'pw01', 'user01@mail.com', '곰돌이1', 'MALE', NOW(), NOW()),
-('user02', 'pw02', 'user02@mail.com', '곰돌이2', 'FEMALE', NOW(), NOW()),
-('user03', 'pw03', 'user03@mail.com', '토끼1', 'MALE', NOW(), NOW()),
-('user04', 'pw04', 'user04@mail.com', '토끼2', 'FEMALE', NOW(), NOW()),
-('user05', 'pw05', 'user05@mail.com', '기린1', 'MALE', NOW(), NOW()),
-('user06', 'pw06', 'user06@mail.com', '기린2', 'FEMALE', NOW(), NOW()),
-('user07', 'pw07', 'user07@mail.com', '사자1', 'MALE', NOW(), NOW()),
-('user08', 'pw08', 'user08@mail.com', '사자2', 'FEMALE', NOW(), NOW()),
-('user09', 'pw09', 'user09@mail.com', '판다1', 'MALE', NOW(), NOW()),
-('user10', 'pw10', 'user10@mail.com', '판다2', 'FEMALE', NOW(), NOW()),
-('user11', 'pw11', 'user11@mail.com', '부엉이1', 'MALE', NOW(), NOW()),
-('user12', 'pw12', 'user12@mail.com', '부엉이2', 'FEMALE', NOW(), NOW()),
-('user13', 'pw13', 'user13@mail.com', '하마1', 'MALE', NOW(), NOW()),
-('user14', 'pw14', 'user14@mail.com', '하마2', 'FEMALE', NOW(), NOW());
+INSERT INTO users (username, password, email, nickname, gender, provider, email_verified, created_at, updated_at)
+VALUES
+('admin', 'encrypted_pw', 'admin@site.com', '관리자', 'MALE', 'LOCAL', TRUE, NOW(), NOW()),
+('user01', 'pw01', 'user01@mail.com', '곰돌이1', 'MALE', 'LOCAL', TRUE, NOW(), NOW()),
+('user02', 'pw02', 'user02@mail.com', '곰돌이2', 'FEMALE', 'LOCAL', TRUE, NOW(), NOW()),
+('user03', 'pw03', 'user03@mail.com', '토끼1', 'MALE', 'LOCAL', TRUE, NOW(), NOW()),
+('user04', 'pw04', 'user04@mail.com', '토끼2', 'FEMALE', 'LOCAL', TRUE, NOW(), NOW()),
+('user05', 'pw05', 'user05@mail.com', '기린1', 'MALE', 'LOCAL', TRUE, NOW(), NOW()),
+('user06', 'pw06', 'user06@mail.com', '기린2', 'FEMALE', 'LOCAL', TRUE, NOW(), NOW()),
+('user07', 'pw07', 'user07@mail.com', '사자1', 'MALE', 'LOCAL', TRUE, NOW(), NOW()),
+('user08', 'pw08', 'user08@mail.com', '사자2', 'FEMALE', 'LOCAL', TRUE, NOW(), NOW()),
+('user09', 'pw09', 'user09@mail.com', '판다1', 'MALE', 'LOCAL', TRUE, NOW(), NOW()),
+('user10', 'pw10', 'user10@mail.com', '판다2', 'FEMALE', 'LOCAL', TRUE, NOW(), NOW());
 
 # =====================
 # 3️⃣ 권한 / 매핑

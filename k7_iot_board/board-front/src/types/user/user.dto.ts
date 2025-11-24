@@ -1,13 +1,31 @@
-//! user.dto.ts
+// =======================================
+// User DTO - Backend 기준 자동 변환
+// =======================================
 
-// DTO request 타입: 백엔드로 보내는 Request Dto
-export interface UserCreateRequest {}
+// 유저 기본 정보
+export interface UserResponse {
+  userId: number;
+  username: string;
+  nickname: string;
+  profileImageUrl?: string;
+  createdAt: string;
+}
 
-// 단일 유저 상세 정보 (GET /users/:userId)
-export interface UserDetailResponse {}
+// 유저 프로필 업데이트 요청
+export interface UserProfileUpdateRequest {
+  nickname: string;
+}
 
-// 리스트 항목
-export interface UserListItemResponse {}
+// 유저 프로필 이미지(FileInfo DTO 사용)
+export interface UserProfileImageResponse {
+  fileId: number;
+  url: string;
+}
 
-// 리스트 응답 데이터
-export type UserListResponse = UserListItemResponse[];
+// 로그인된 사용자 정보
+export interface MeResponse {
+  userId: number;
+  username: string;
+  nickname: string;
+  profileImageUrl?: string;
+}

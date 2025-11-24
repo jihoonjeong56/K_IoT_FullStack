@@ -2,6 +2,7 @@ package org.example.boardback.controller.user;
 
 import lombok.RequiredArgsConstructor;
 import org.example.boardback.common.apis.user.UserApi;
+import org.example.boardback.dto.ResponseDto;
 import org.example.boardback.entity.file.FileInfo;
 import org.example.boardback.service.impl.ProfileServiceImpl;
 import org.springframework.http.ResponseEntity;
@@ -22,12 +23,12 @@ public class UserController {
     private final ProfileServiceImpl profileService;
 
     @PostMapping(UserApi.ME + "/profile")
-    public ResponseEntity<?> uploadProfile(
+    public ResponseEntity<ResponseDto<?>> uploadProfile(
 //            @AuthenticationPrincipal Long userId,
             @RequestParam("file")MultipartFile file
     ) {
         Long userId = 1L;
-        FileInfo saved = profileService.updateProfile(userId, file);
-        return ResponseEntity.ok(saved);
+        ResponseDto<FileInfo> result = profileService.updateProfile(userId, file);
+        return ResponseEntity.status(result.getStatus()).body(result);
     }
 }

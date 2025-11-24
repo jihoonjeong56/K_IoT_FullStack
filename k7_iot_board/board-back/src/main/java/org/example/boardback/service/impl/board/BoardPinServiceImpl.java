@@ -1,4 +1,3 @@
-
 package org.example.boardback.service.impl.board;
 
 import org.example.boardback.dto.ResponseDto;

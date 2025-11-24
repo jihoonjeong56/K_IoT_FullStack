@@ -1,4 +1,3 @@
-
 package org.example.boardback.dto.board.request;
 
 import jakarta.validation.constraints.*;

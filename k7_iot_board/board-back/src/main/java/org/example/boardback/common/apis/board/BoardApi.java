@@ -52,7 +52,7 @@ public class BoardApi {
 
     // + 통계
     public static final String STATS = "/stats";
-    public static final String STATS_DAIRY = STATS + "/daily";
+    public static final String STATS_DAILY = STATS + "/daily";
     public static final String STATS_MONTHLY = STATS + "/monthly";
     public static final String STATS_GENDER = STATS + "/gender";
 }

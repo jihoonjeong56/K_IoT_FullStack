@@ -5,6 +5,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.example.boardback.common.enums.AuthProvider;
 import org.example.boardback.common.enums.Gender;
 import org.example.boardback.common.enums.RoleType;
 import org.example.boardback.entity.base.BaseTimeEntity;
@@ -21,19 +22,21 @@ import java.util.stream.Collectors;
                 @UniqueConstraint(name = "uk_users_username", columnNames = "username"),
                 @UniqueConstraint(name = "uk_users_email", columnNames = "email"),
                 @UniqueConstraint(name = "uk_users_nickname", columnNames = "nickname"),
+                @UniqueConstraint(name = "uk_users_provider_provider_id", columnNames = {"provider", "provider_id"}),
         }
 )
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User extends BaseTimeEntity {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", updatable = false)
     private Long id;
 
     @Column(name = "username", updatable = false, nullable = false, length = 50)
     private String username;
 
-    @Column(name = "password", nullable = false, length = 255)
+    @Column(name = "password", length = 255)
     private String password;
 
     @Column(name = "email", nullable = false, length = 255)
@@ -55,14 +58,49 @@ public class User extends BaseTimeEntity {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<UserRole> userRoles = new HashSet<>();
 
+    // OAuth2 필드
+    // 1) 가입 경로 (LOCAL/ GOOGLE / KAKAO / NAVER)
+    @Enumerated(EnumType.STRING)
+    @Column(name = "provider", length = 20, nullable = false)
+    private AuthProvider provider;
+
+    // 2) 각 provider가 주는 유니크 ID
+    @Column(name = "provider_id", length = 100)
+    private String providerId;
+
+    //3) 이메일 인증 여부 (소셜은 대부분 true 처리)
+    @Column(name = "email_verified", nullable = false)
+    private boolean emailVerified;
+
     @Builder
-    private User(String username, String password, String email, String nickname, Gender gender, FileInfo profileFile) {
+    private User(String username, String password, String email, String nickname, Gender gender, FileInfo profileFile, AuthProvider provider, String providerId, boolean emailVerified) {
         this.username = username;
         this.password = password;
         this.email = email;
         this.nickname = nickname;
         this.gender = gender;
         this.profileFile = profileFile;
+        this.provider = provider;
+        this.providerId = providerId;
+        this.emailVerified = emailVerified;
+    }
+
+    // OAuth2용 생성/업데이트 메서드
+    public static User createOauthUser(AuthProvider provider, String providerId, String email, String name) {
+        return User.builder()
+                .username(provider.name() + "_" + providerId)
+                .password(null)
+                .email(email)
+                .nickname(name)
+                .provider(provider)
+                .providerId(providerId)
+                .emailVerified(true)
+                .build();
+    }
+
+    public void updateOauthProfile(String name, String email) {
+        this.nickname = name;
+        this.email = email;
     }
 
     // == 도메인 로직 == //

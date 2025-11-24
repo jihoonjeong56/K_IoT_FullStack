@@ -1,15 +1,12 @@
-import { boardApi } from "@/apis/board/board.api";
-import type {
-  BoardFileListDto,
-  BoardListResponse,
-} from "@/types/board/board.dto";
-import { downloadFile } from "@/utils/download";
-import styled from "@emotion/styled";
-import React, { useEffect, useState } from "react";
+import { boardApi } from '@/apis/board/board.api';
+import type { BoardFileListDto, BoardListResponse } from '@/types/board/board.dto';
+import { downloadFile } from '@/utils/download';
+import styled from '@emotion/styled';
+import React, { useEffect, useState } from 'react'
 
 interface BoardFileListProps {
   boardId: number;
-  onChange?: () => void;
+  onChange?: () => void; 
 }
 
 const Wrap = styled.div`
@@ -65,30 +62,28 @@ function BoardFileList({ boardId, onChange }: BoardFileListProps) {
   //^ === EVENT HANDLER ===
   const onDownload = async (file: BoardFileListDto) => {
     await downloadFile(file.fileId, file.originalName);
-  };
+  }
 
   const onDelete = async (fileId: number) => {
     if (!confirm("파일을 삭제하시겠습니까?")) return;
 
     try {
       await boardApi.DELETE_BOARD_FILE(fileId);
-      setFiles((prev) => prev.filter((p) => p.fileId !== fileId));
+      setFiles(prev => prev.filter(p => p.fileId !== fileId));
       onChange?.();
     } catch (e: any) {
       console.error(e);
       alert(e?.response?.data?.message ?? "삭제 실패");
     }
-  };
+  }
 
   return (
     <Wrap>
       <h4>첨부파일</h4>
-      {loading ? (
-        <div>로딩중입니다.</div>
-      ) : (
+      {loading ? <div>로딩중입니다.</div> : (
         <>
           {files.length === 0 && <div>첨부된 파일이 없습니다.</div>}
-          {files.map((file) => (
+          {files.map(file => (
             <Row key={file.fileId}>
               <Name title={file.originalName}>{file.originalName}</Name>
               <img src={file.downloadUrl} alt="" />
@@ -101,7 +96,7 @@ function BoardFileList({ boardId, onChange }: BoardFileListProps) {
         </>
       )}
     </Wrap>
-  );
+  )
 }
 
-export default BoardFileList;
+export default BoardFileList

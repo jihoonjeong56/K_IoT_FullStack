@@ -105,24 +105,21 @@ public class WebSecurityConfig {
             }
 
             auth
+                    // .permitAll(): 인증 인가 없이 모두 가능
                     .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                    .requestMatchers("/api/v1/auth/**").permitAll()
-                    .requestMatchers("/api/v1/notices/**").permitAll()
+                    .requestMatchers("/api/v1/auth/**").permitAll()         // 로그인, 회원가입 등 - 인증 서비스
+                    .requestMatchers(HttpMethod.GET, "/api/v1/boards/**").permitAll()   // 게시반 조회 기능
 
-                    .requestMatchers("/api/v1/users/me/**").authenticated()
+                    // 인증된 사용자만 사용가능(권한 x)
+                    // : HttpMethod는 선택값, URL 경로ㄹ는 필수
+                    // .requestMatchers(HttpMethod.GET, "/api/v1/~~").authenticated()
 
-                    .requestMatchers(HttpMethod.GET, "/api/v1/boards/**")
-                    .hasAnyRole("USER", "MANAGER", "ADMIN")
-                    .requestMatchers(HttpMethod.POST, "/api/v1/boards/**")
-                    .hasAnyRole("MANAGER", "ADMIN")
-                    .requestMatchers(HttpMethod.PUT, "/api/v1/boards/**")
-                    .hasAnyRole("MANAGER", "ADMIN")
-                    .requestMatchers(HttpMethod.DELETE, "/api/v1/boards/**")
-                    .hasRole("ADMIN")
+                    // 인가(특정 권한)된 사용자만 사용 가능
+                    // : 역할에 따른 분리
+                    // .requestMatchers(HttpMethod.GET, "/api/v1/~~").hasAnyRole("A권한", "B권한")
+                    // .requestMatchers(HttpMethod.GET, "/api/v1/~~").hasRole("단일권한")
 
-                    .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
-
-                    .anyRequest().authenticated();
+                    .anyRequest().authenticated();      // 그 외에는 인증 필요
         });
 
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

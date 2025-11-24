@@ -47,21 +47,27 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public ResponseDto<LoginResponseDto> login(LoginRequestDto request) {
         try {
+            // 스프링 시큐리티 AuthenticationManager 로 인증 시도
+            // : ID 가 존재하는지
+            // : 해당 ID 의 비밀번호가 맞는지
+            // >> 전보 내부에서 검사 (틀리면 BadCredentialsException 발생)
             var authToken = new UsernamePasswordAuthenticationToken(
                     request.username(), request.password()
             );
 
             var authentication = authenticationManager.authenticate(authToken);
 
-            // 인증 성공
+            // 인증 성공 : username 꺼내기
             String username = authentication.getName();
 
+            // UserPrincipal 권한 조회
             var principal = userPrincipalMapper.toPrincipal(username);
             Set<String> roles = principal.getAuthorities()
                     .stream()
                     .map(a -> a.getAuthority())
                     .collect(java.util.stream.Collectors.toSet());
 
+            // Access / Refresh Token 생성
             String accessToken = jwtProvider.generateAccessToken(username, roles);
             String refreshToken = jwtProvider.generateRefreshToken(username, roles);
 
@@ -70,6 +76,8 @@ public class AuthServiceImpl implements AuthService {
 
             Instant refreshExpiry = Instant.now().plusMillis(refreshRemaining);
 
+            // DB에 RefreshToken 저장(또는 갱신)
+            // : 즉 이 계정은 현재 해당 RefreshToken을 가진 상태다 라는 것을 DB에 기록
             User user = userRepository.findByUsername(username)
                     .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
@@ -108,28 +116,35 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public ResponseDto<LoginResponseDto> refresh(RefreshRequestDto request) {
 
+        // 전달받은 refreshToken 문자열을 꺼탬
         String provided = request.refreshToken();
 
+        // jwtProvider로 유효성 검사
         if (!jwtProvider.isValidToken(provided)) {
             throw new BusinessException(ErrorCode.TOKEN_INVALID);
         }
 
+        // 토크에서 username 꺼내기
         String username = jwtProvider.getUsernameFromJwt(provided);
 
+        // DB 에서 해당 유저의 RefreshToken 레코드 조회
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         RefreshToken stored = refreshTokenRepository.findByUser(user)
                 .orElseThrow(() -> new BusinessException(ErrorCode.TOKEN_INVALID));
 
+        // DB에 저장된 토큰과 현재 요청 토크이
         if (!stored.getToken().equals(provided)) {
             throw new BusinessException(ErrorCode.TOKEN_INVALID, "Refresh token mismatch");
         }
 
+        // 토큰 만료 여부 체크
         if (stored.isExpired()) {
             throw new BusinessException(ErrorCode.TOKEN_EXPIRED);
         }
 
+        // 새 Access / Refresh Token 생성 + RefreshToken 엔티티 갱신
         var principal = userPrincipalMapper.map(user);
         Set<String> roles = principal.getAuthorities()
                 .stream().map(a -> a.getAuthority()).collect(java.util.stream.Collectors.toSet());
@@ -174,16 +189,22 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public ResponseDto<SignupResponseDto> signup(SignupRequestDto request) {
 
+        // isPresent(): Optional 타입 내부에 데이터가 존재하면 true, 존재하지 않으면 false
+        // 아이디 중복체크
         if (userRepository.findByUsername(request.username()).isPresent()) {
+            // 기존에 해당 아이디가 있으면 예외 발생
             throw new BusinessException(ErrorCode.DUPLICATE_USER);
         }
 
+        // 이메일 중복체크
         if (userRepository.findByEmail(request.email()).isPresent()) {
             throw new BusinessException(ErrorCode.DUPLICATE_USER);
         }
 
+        // User 엔티티 생성 + 저장
         User newUser = User.builder()
                 .username(request.username())
+                // 비밀번호 암호화
                 .password(passwordEncoder.encode(request.password()))
                 .email(request.email())
                 .nickname(request.nickname())
@@ -191,6 +212,7 @@ public class AuthServiceImpl implements AuthService {
 
         userRepository.save(newUser);
 
+        // 이메일 토큰(선택) - 이메일 인증용 토큰 발급 + 메일 전송
         String emailToken = jwtProvider.generateEmailJwtToken(request.email(), "VERIFY_EMAIL");
 
         String verifyUrl = "https://myservice.com/email/verify?token=" + emailToken;

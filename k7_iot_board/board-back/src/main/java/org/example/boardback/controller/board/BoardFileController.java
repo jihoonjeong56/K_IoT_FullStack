@@ -29,12 +29,12 @@ public class BoardFileController {
     private final BoardFileServiceImpl boardFileService;
 
     @PostMapping(BoardFileApi.UPLOAD)
-    public ResponseEntity<?> uploadBoardFiles(
+    public ResponseEntity<ResponseDto<Void>> uploadBoardFiles(
             @PathVariable Long boardId,
             @RequestParam("files") List<MultipartFile> files
     ) {
-        boardFileService.uploadBoardFiles(boardId, files);
-        return ResponseEntity.ok("업로드 성공");
+        ResponseDto<Void> result = boardFileService.uploadBoardFiles(boardId, files);
+        return ResponseEntity.status(result.getStatus()).body(result);
     }
 
     @GetMapping(BoardFileApi.LIST)
@@ -67,9 +67,9 @@ public class BoardFileController {
     }
 
     @DeleteMapping(BoardFileApi.DELETE)
-    public ResponseEntity<Void> deleteBoardFile(@PathVariable Long fileId) {
-        boardFileService.deleteBoardFile(fileId);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<ResponseDto<Void>> deleteBoardFile(@PathVariable Long fileId) {
+        ResponseDto<Void> result = boardFileService.deleteBoardFile(fileId);
+        return ResponseEntity.ok(result);
     }
 
     @PutMapping(
@@ -84,7 +84,7 @@ public class BoardFileController {
             //      >> FormData 기반 요청에는 @RequestBody 사용 불가
             //      >> @ModelAttribute가 가장 안정적인 방식
             @ModelAttribute BoardFileUpdateRequestDto dto) {
-        boardFileService.updateBoardFiles(boardId, dto);
-        return ResponseEntity.noContent().build();
+        ResponseDto<Void> result = boardFileService.updateBoardFiles(boardId, dto);
+        return ResponseEntity.ok(result);
     }
 }

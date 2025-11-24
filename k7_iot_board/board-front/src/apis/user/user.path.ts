@@ -14,4 +14,4 @@ export const USER_PATH = {
   BY_ID: (userId: number) => `${USER_PREFIX}/${userId}`,
 
   ME: `${USER_PREFIX}/me`,
-};
+}

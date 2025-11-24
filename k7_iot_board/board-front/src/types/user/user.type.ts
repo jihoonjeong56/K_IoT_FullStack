@@ -4,4 +4,6 @@
 // ? cf) DTO와 FORM/Request 타입은 분리하는 게 실무 표준
 
 // 프론트 입력 폼 작성용
-export interface UserCreateForm {}
+export interface UserCreateForm {
+  
+}

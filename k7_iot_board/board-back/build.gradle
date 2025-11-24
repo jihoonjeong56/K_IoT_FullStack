@@ -26,6 +26,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-mail'
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 
     // JWT
     implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
@@ -35,8 +36,7 @@ dependencies {
     // MySQL
     runtimeOnly 'com.mysql:mysql-connector-j'
     implementation 'com.mysql:mysql-connector-j'
-
-    // H2 DataBase
+    // H2 Database
     runtimeOnly 'com.h2database:h2'
 
     // Lombok

@@ -3,7 +3,7 @@ import { boardApi } from "@/apis/board/board.api";
 export async function downloadFile(fileId: number, filename?: string) {
   const data: Blob = await boardApi.DOWNLOAD(fileId); // blob 타입의 데이터
 
-  const link = document.createElement("a");
+  const link = document.createElement('a');
   const url = window.URL.createObjectURL(data);
   link.href = url;
   link.download = filename || `file_${fileId}`;

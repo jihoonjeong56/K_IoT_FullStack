@@ -2,6 +2,7 @@ package org.example.boardback.service.impl;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.example.boardback.dto.ResponseDto;
 import org.example.boardback.entity.file.FileInfo;
 import org.example.boardback.entity.user.User;
 import org.example.boardback.repository.file.FileInfoRepository;
@@ -19,7 +20,7 @@ public class ProfileServiceImpl {
     private final FileServiceImpl fileService;
 
     @Transactional
-    public FileInfo updateProfile(Long userId, MultipartFile file) {
+    public ResponseDto<FileInfo> updateProfile(Long userId, MultipartFile file) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
 
@@ -35,13 +36,13 @@ public class ProfileServiceImpl {
         }
 
         // 새 파일 저장
-        FileInfo saved = fileService.saveUserProfile(file);
+        FileInfo saved = fileService.saveUserProfileImage(file);
 
         // User 테이블에 file_id 저장
         user.updateProfileImage(saved);
         userRepository.save(user);
 
-        return saved;
+        return ResponseDto.success(saved);
     }
 
 

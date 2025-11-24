@@ -17,6 +17,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -35,6 +36,54 @@ public class FileServiceImpl {
     private String boardRootPath;
 
     private final FileInfoRepository fileInfoRepository;
+
+    // 허용할 확장자 (상황에 따라 조정)
+    private static final Set<String> ALLOWED_EXTENSIONS = Set.of(
+            "jpg", "jpeg", "png", "gif",
+            "pdf", "txt", "zip"
+    );
+
+    // 단일 파일 최대 크기 (예: 10MB)
+    private static final long MAX_FILE_SIZE = 10 * 1024 * 1024L;
+
+    /** 파일 유효성 검증 */
+    private void validateFile(MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            throw new FileStorageException(ErrorCode.INVALID_INPUT, "빈 파일은 업로드할 수 없습니다.");
+        }
+
+        if (file.getSize() > MAX_FILE_SIZE) {
+            throw new FileStorageException(
+                    ErrorCode.INVALID_INPUT,
+                    "파일 용량이 너무 큽니다. 최대 10MB까지 업로드 가능합니다."
+            );
+        }
+
+        String original = file.getOriginalFilename();
+        String cleanName = StringUtils.cleanPath(original != null ? original : "");
+
+        // 경로 조작 방지
+        if (cleanName.contains("..")) {
+            throw new FileStorageException(
+                    ErrorCode.INVALID_INPUT,
+                    "잘못된 파일 이름입니다."
+            );
+        }
+
+        // 확장자 체크
+        String ext = "";
+        int dot = cleanName.lastIndexOf('.');
+        if (dot != -1 && dot < cleanName.length() - 1) {
+            ext = cleanName.substring(dot + 1).toLowerCase();
+        }
+
+        if (!ALLOWED_EXTENSIONS.contains(ext)) {
+            throw new FileStorageException(
+                    ErrorCode.INVALID_INPUT,
+                    "허용되지 않는 파일 형식입니다."
+            );
+        }
+    }
 
     /** 업로드 디렉토리 생성 */
     private void ensureDirectory(String path) {
@@ -60,14 +109,18 @@ public class FileServiceImpl {
     }
 
     /** 프로필 업로드 (1개만 유지) */
-    public FileInfo saveUserProfile(MultipartFile file) {
+    public FileInfo saveUserProfileImage(MultipartFile file) {
 //        long maxSize = 5 * 1024 * 1024; // 5MB
 //
 //        if (file.getSize() > maxSize) {
 //            throw new IllegalArgumentException("파일 크기가 제한을 초과했습니다.");
 //        }
 
-        if (file.isEmpty()) return null;
+        // 프로필은 파일이 선택 안 된 경우도 있을 수 있음
+        if (file == null || file.isEmpty()) return null;
+
+        // ✅ 파일 검증 추가
+        validateFile(file);
 
         try {
             String original = file.getOriginalFilename();
@@ -101,7 +154,13 @@ public class FileServiceImpl {
 
     /** 게시글 파일 업로드 */
     public FileInfo saveBoardFile(Long boardId, MultipartFile file) {
-        if (file.isEmpty()) return null;
+        // 업로드할 파일이 아예 없을 수도 있음
+        if (file == null || file.isEmpty()) {
+            return null;
+        }
+
+        // ✅ 검증
+        validateFile(file);
 
         try {
             String original = file.getOriginalFilename();

@@ -52,4 +52,4 @@ export const BOARD_PATH = {
   STATS_DAILY: `${BOARD_PREFIX}/stats/daily`,
   STATS_MONTHLY: `${BOARD_PREFIX}/stats/monthly`,
   STATS_GENDER: `${BOARD_PREFIX}/stats/gender`,
-};
+}

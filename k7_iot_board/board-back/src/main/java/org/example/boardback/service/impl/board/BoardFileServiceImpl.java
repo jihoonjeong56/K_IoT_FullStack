@@ -53,7 +53,12 @@ public class BoardFileServiceImpl implements BoardFileService {
 
         int order = 0;
         for (MultipartFile mf : files) {
+            if (mf == null || mf.isEmpty()) {
+                continue;
+            }
             FileInfo info = fileService.saveBoardFile(boardId, mf);
+            if (info == null) continue;
+
             BoardFile boardFile = BoardFile.of(board, info, order++);
             boardFileRepository.save(boardFile);
         }

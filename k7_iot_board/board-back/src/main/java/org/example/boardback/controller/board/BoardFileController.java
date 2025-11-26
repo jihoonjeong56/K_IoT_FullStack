@@ -6,7 +6,7 @@ import org.example.boardback.dto.ResponseDto;
 import org.example.boardback.dto.board_file.BoardFileListDto;
 import org.example.boardback.dto.board_file.BoardFileUpdateRequestDto;
 import org.example.boardback.entity.file.FileInfo;
-import org.example.boardback.service.impl.board.BoardFileServiceImpl;
+import org.example.boardback.service.board.impl.BoardFileServiceImpl;
 import org.springframework.core.io.PathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;

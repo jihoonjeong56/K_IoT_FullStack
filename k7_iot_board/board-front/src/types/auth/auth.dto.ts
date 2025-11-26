@@ -11,20 +11,25 @@ export interface LoginRequest {
 // 로그인 응답
 export interface LoginResponse {
   accessToken: string;
-  refreshToken: string;
   accessTokenExpiresInMillis: number;
-  userId: number;
-  nickname: string;
 }
+
+type Gender = "MALE" | "FEMALE" | "NONE";
 
 // 회원가입 요청
 export interface SignupRequest {
   username: string;
   password: string;
+  confirmPassword: string;
   nickname: string;
+  email: string;
+  gender: Gender;
+  provider: string;
+  // gender 등 추가 가능
 }
 
-// Refresh 요청
-export interface RefreshRequest {
-  refreshToken: string;
+export interface PasswordResetRequestDto {
+  token: string;
+  newPassword: string;
+  confirmPassword: string;
 }

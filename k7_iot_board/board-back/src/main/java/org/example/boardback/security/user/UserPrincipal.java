@@ -60,8 +60,9 @@ public class UserPrincipal implements UserDetails, OAuth2User, Serializable {
     public Map<String, Object> getAttributes() {
         return attributes;
     }
+
     @Override
-    public String getName(){
+    public String getName() {
         return name;
     }
 

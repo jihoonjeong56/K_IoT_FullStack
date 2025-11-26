@@ -1,22 +1,44 @@
-import { useAuthInitQuery } from "@/hooks/auth/useAuthInitQuery";
+import { useEffect } from "react";
+import { useAuthStore } from "./stores/auth.store";
+import { userApi } from "./apis/user/user.api";
+import { GlobalStyle } from "./styles/global";
+import Layout from "./components/layout/Layout";
+import AuthRouter from "./pages/auth/AuthRouter";
+import MainRouter from "./pages/MainRouter";
 
 export default function App() {
-  const { data: isLoggedIn, isLoading } = useAuthInitQuery();
+  const { isInitialized, accessToken, user, setUser } = useAuthStore();
 
-  if (isLoading) return <div>Loading...</div>;
+  useEffect(() => {
+    if (!isInitialized) return;
+    if (!accessToken) return;
+    if (user) return;
+
+    (async () => {
+      if (accessToken && !user) {
+        const me = await userApi.me();
+        if (me.success && me.data) {
+          setUser(me.data);
+        }
+      }
+    })();
+  }, [isInitialized, accessToken]);
+
+  if (!isInitialized) {
+    return <div>로딩중</div>;
+  }
+
+  const isLoggedIn = Boolean(accessToken && user);
 
   return (
     <>
+      <GlobalStyle />
       {isLoggedIn ? (
-        <>
-          로그인이 된 경우
-        </>
-        // <MainRouter />  // 로그인이 된 경우
+        <Layout>
+          <MainRouter />
+        </Layout>
       ) : (
-        // <AuthRouter />  // 로그인 필요
-        <>
-          로그인 필요
-        </>
+        <AuthRouter />
       )}
     </>
   );

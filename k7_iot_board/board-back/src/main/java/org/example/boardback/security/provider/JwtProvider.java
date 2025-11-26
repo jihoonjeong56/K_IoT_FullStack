@@ -91,13 +91,12 @@ public class JwtProvider {
         Date exp = new Date(now + emailExpMs);
 
         return Jwts.builder()
-                .subject(email) // subject에도 email 저장 (편의성)
+                .setSubject(email) // subject에도 email 저장 (편의성)
                 .claim(CLAIM_EMAIL, email)
                 .claim(CLAIM_TYPE, type)
-                .issuedAt(iat)
-                .expiration(exp)
+                .setIssuedAt(iat)
+                .setExpiration(exp)
                 .signWith(key, SignatureAlgorithm.HS256)
-                // .signWith(key, Jwts.SIG.HS256)
                 .compact();
     }
 

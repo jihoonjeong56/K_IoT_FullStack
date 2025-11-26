@@ -20,16 +20,15 @@ import java.util.stream.Collectors;
         name = "users",
         uniqueConstraints = {
                 @UniqueConstraint(name = "uk_users_username", columnNames = "username"),
-                @UniqueConstraint(name = "uk_users_email", columnNames = "email"),
+//                @UniqueConstraint(name = "uk_users_email", columnNames = "email"),
                 @UniqueConstraint(name = "uk_users_nickname", columnNames = "nickname"),
-                @UniqueConstraint(name = "uk_users_provider_provider_id", columnNames = {"provider", "provider_id"}),
+                @UniqueConstraint(name = "uk_users_provider_provider_id", columnNames = {"provider", "provider_id"})
         }
 )
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User extends BaseTimeEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", updatable = false)
     private Long id;
 
@@ -52,14 +51,14 @@ public class User extends BaseTimeEntity {
     // 프로필 이미지 파일 매핑
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "profile_file_id",
-            foreignKey = @ForeignKey(name = "fk_users_profile_file"))
+        foreignKey = @ForeignKey(name = "fk_users_profile_file"))
     private FileInfo profileFile;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<UserRole> userRoles = new HashSet<>();
 
     // OAuth2 필드
-    // 1) 가입 경로 (LOCAL/ GOOGLE / KAKAO / NAVER)
+    // 1) 가입 경로 (LOCAL / GOOGLE / KAKAO / NAVER)
     @Enumerated(EnumType.STRING)
     @Column(name = "provider", length = 20, nullable = false)
     private AuthProvider provider;
@@ -68,12 +67,22 @@ public class User extends BaseTimeEntity {
     @Column(name = "provider_id", length = 100)
     private String providerId;
 
-    //3) 이메일 인증 여부 (소셜은 대부분 true 처리)
+    // 3) 이메일 인증 여부 (소셜은 대부분 true 처리)
     @Column(name = "email_verified", nullable = false)
     private boolean emailVerified;
 
     @Builder
-    private User(String username, String password, String email, String nickname, Gender gender, FileInfo profileFile, AuthProvider provider, String providerId, boolean emailVerified) {
+    private User(
+            String username,
+            String password,
+            String email,
+            String nickname,
+            Gender gender,
+            FileInfo profileFile,
+            AuthProvider provider,
+            String providerId,
+            boolean emailVerified
+    ) {
         this.username = username;
         this.password = password;
         this.email = email;
@@ -86,7 +95,12 @@ public class User extends BaseTimeEntity {
     }
 
     // OAuth2용 생성/업데이트 메서드
-    public static User createOauthUser(AuthProvider provider, String providerId, String email, String name) {
+    public static User createOauthUser(
+            AuthProvider provider,
+            String providerId,
+            String email,
+            String name
+    ) {
         return User.builder()
                 .username(provider.name() + "_" + providerId)
                 .password(null)

@@ -25,6 +25,7 @@ public class KakaoOAuth2UserInfo extends OAuth2UserInfo {
         if (kakaoAccount == null) return null;
         Map<String, Object> profile = (Map<String, Object>) kakaoAccount.get("profile");
         if (profile == null) return null;
+
         return (String) profile.get("nickname");
     }
 
@@ -34,6 +35,7 @@ public class KakaoOAuth2UserInfo extends OAuth2UserInfo {
         if (kakaoAccount == null) return null;
         Map<String, Object> profile = (Map<String, Object>) kakaoAccount.get("profile");
         if (profile == null) return null;
+
         return (String) profile.get("profile_image_url");
     }
 }

@@ -1,4 +1,4 @@
--- DROP DATABASE IF EXISTS `board_v1`; 
+# DROP DATABASE IF EXISTS `board_v1`; 
 CREATE DATABASE IF NOT EXISTS `board_v1`
 	CHARACTER SET utf8mb4
     COLLATE utf8mb4_general_ci;
@@ -56,6 +56,9 @@ CREATE TABLE users (
     provider_id VARCHAR(100),
     email_verified BOOLEAN NOT NULL,
     
+    point_balance BIGINT NOT NULL DEFAULT 0 COMMENT '사용자 포인트 잔액',
+    
+    
     created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     updated_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
     
@@ -75,6 +78,68 @@ CREATE TABLE users (
     COMMENT = '사용자 기본 정보 테이블';
 
 select * from users;
+
+CREATE TABLE payments(
+	id BIGINT AUTO_INCREMENT PRIMARY KEY,
+	user_id BIGINT NOT NULL COMMENT '결제한 사용자 ID',
+    
+    order_id VARCHAR(100) NOT NULL COMMENT '주문 ID(내부 주문 번호)',
+	payment_key VARCHAR(100) NOT NULL COMMENT '결제 키(PG 또는 모의 PG 트랜잭션 키)',
+    amount BIGINT NOT NULL COMMENT '결제 금액(포인트)',
+    method VARCHAR(30) NOT NULL COMMENT '결제수단(MOCK, KAKAO_PAY, TOSS_PAY)',
+    status VARCHAR(30) NOT NULL COMMENT '결제 상태',
+    
+    product_code VARCHAR(50) NOT NULL COMMENT '상품코드',
+    product_name VARCHAR(100) NOT NULL COMMENT '상품 이름',
+    
+    failure_code VARCHAR(50) NULL COMMENT '결제 실패 코드',
+    failure_message VARCHAR(100) NULL COMMENT '결제 실패 사유',
+    
+	requested_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) COMMENT '결제 요청 시각',
+    approvded_at DATETIME(6) COMMENT '결제 승인 시각',
+    cancelled_at DATETIME(6) COMMENT '결제 취소 환불 시각',
+    
+	created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    updated_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+    
+    constraint `uk_payments_payment_key` UNIQUE (payment_key),
+    INDEX `idx_payments_user_id` (user_id),
+    INDEX `idx_payments_order_id` (order_id),
+    
+    CONSTRAINT `fk_payments_user` FOREIGN KEY (user_id) REFERENCES users(id)
+)ENGINE=InnoDB
+    DEFAULT CHARSET = utf8mb4
+    COLLATE = utf8mb4_unicode_ci
+    COMMENT = '결제 내역 테이블';
+    
+    
+    
+CREATE TABLE payment_refunds(
+	id BIGINT AUTO_INCREMENT PRIMARY KEY,
+	payment_id BIGINT NOT NULL COMMENT '원 결제 ID',
+    
+    amount BIGINT NOT NULL COMMENT '환불 금액(포인트)',
+    reason VARCHAR(255) NULL COMMENT '환불 사유',
+    status VARCHAR(30) NOT NULL COMMENT '환불 상태',
+    
+    failure_code VARCHAR(50) NULL COMMENT '환불 실패 코드',
+    failure_message VARCHAR(100) NULL COMMENT '환불 실패 사유',
+    
+	requested_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) COMMENT '환불 요청 시각',
+    completed_at DATETIME(6) NULL,
+    
+	created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    updated_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+    
+    INDEX `idx_payment_refunds_payment_id` (payment_id),
+    
+    CONSTRAINT `fk_payment_refund_payment` FOREIGN KEY (payment_id) REFERENCES payments(id)
+)ENGINE=InnoDB
+    DEFAULT CHARSET = utf8mb4
+    COLLATE = utf8mb4_unicode_ci
+    COMMENT = '결제 내역 테이블';
+    
+
 # === ROLES (권한) === #
 CREATE TABLE roles (
 	role_name VARCHAR(30) PRIMARY KEY,

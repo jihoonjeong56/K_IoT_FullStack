@@ -8,14 +8,13 @@ import java.time.LocalDateTime;
 public record PaymentResponseDto(
         Long id,
         String orderId,
-        String paymentKey, // PG 에서 승인시 필요한 key
+        String paymentKey,
         Long amount,
         PaymentMethod method,
         PaymentStatus status,
         String productCode,
         String productName,
-        Long userPointBalance, // 결제 후 포인트 잔액 계산용
+        Long userPointBalance,
         LocalDateTime requestedAt,
         LocalDateTime approvedAt
-) {
-}
+) { }

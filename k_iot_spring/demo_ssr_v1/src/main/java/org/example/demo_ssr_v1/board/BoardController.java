@@ -21,7 +21,7 @@ import java.util.List;
 @Controller // IoC
 public class BoardController {
 
-    private final BoardPersistRepository repository;
+    private final BoardRepository repository;
 
     /**
      * 게시글 수정 화면 요청
@@ -35,9 +35,7 @@ public class BoardController {
 
         // 1. 인증 검사 (0)
         User sessionUser = (User)session.getAttribute("sessionUser"); // sessionUser -> 상수
-        if(sessionUser == null) {
-            throw new Exception401("로그인 해주세요");
-        }
+        // LoginInterceptor가 알아서 처리해줌
 
         // 2. 인가 검사 (0)
         Board board =  repository.findById(id);
@@ -64,9 +62,7 @@ public class BoardController {
 
         // 1. 인증 처리 (o)
         User sessionUser =  (User)session.getAttribute("sessionUser");
-        if(sessionUser == null) {
-            throw new Exception401("로그인 해주세요");
-        }
+        // LoginInterceptor가 알아서 처리해줌
 
         Board board = repository.findById(id);
         if(board.isOwner(sessionUser.getId())==false){
@@ -105,9 +101,8 @@ public class BoardController {
     @GetMapping("/board/save")
     public String saveForm(HttpSession session) {
         User sessionUser = (User) session.getAttribute("sessionUser");
-        if(sessionUser == null) {
-            throw new Exception401("로그인 해주세요");
-        }
+        // LoginInterceptor가 알아서 처리해줌
+
         return "board/save-form";
     }
 
@@ -121,9 +116,7 @@ public class BoardController {
     public String saveProc(BoardRequest.SaveDTO saveDTO, HttpSession session) {
         // 1. 인증 처리 확인
         User sessionUser = (User) session.getAttribute("sessionUser");
-        if(sessionUser == null) {
-            throw new Exception401("로그인 해주세요");
-        }
+        // LoginInterceptor가 알아서 처리해줌
 
         Board board = saveDTO.toEntity(sessionUser);
         repository.save(board);
@@ -141,9 +134,8 @@ public class BoardController {
         // 1. 인증 처리 (o)
         // 1. 인증 처리 확인
         User sessionUser = (User) session.getAttribute("sessionUser");
-        if(sessionUser == null) {
-            throw new Exception401("로그인 해주세요");
-        }
+        // LoginInterceptor가 알아서 처리해줌
+
         // 2. 인가 처리 (o) || 관리자 권한
         Board board = repository.findById(id);
         if(board.isOwner(sessionUser.getId())==false){
@@ -162,9 +154,8 @@ public class BoardController {
     @GetMapping("board/{id}")
     public String detail(@PathVariable Long id, Model model) {
         Board board = repository.findById(id);
-        if(board == null) {
-            throw new Exception404("게시글을 찾을 수 없습니다.");
-        }
+        // LoginInterceptor가 알아서 처리해줌
+
         model.addAttribute("board", board);
         return "board/detail";
     }

@@ -36,15 +36,20 @@ public class User {
         this.createdAt = createdAt;
     }
 
-    // 회원정보 수정 비즈니스 로직
-    // 추후 DTO 설계
-    public void update(UserRequest.UpdateDTO updateDTO){
+    // 회원정보 수정 비즈니스 로직 추가
+    // 추후 DTO  설계
+    public void update(UserRequest.UpdateDTO updateDTO) {
         // 유효성 검사
         updateDTO.validate();
         this.password = updateDTO.getPassword();
-//        this.email = updateDTO.getEmail();
-        // 더티 체킹(병경 감지)
+        // 더티 체킹 (변경 감지)
         // 트랜잭션이 끝나면 자동으로 update 쿼리 진행
-
     }
+
+    // 회원 정보 소유자 확인 로직
+    public boolean isOwner(Long userId) {
+        return this.id.equals(userId);
+    }
+
 }
+

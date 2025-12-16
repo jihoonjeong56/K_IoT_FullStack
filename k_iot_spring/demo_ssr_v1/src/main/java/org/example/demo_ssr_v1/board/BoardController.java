@@ -2,13 +2,7 @@ package org.example.demo_ssr_v1.board;
 
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
-import org.example.demo_ssr_v1._core.errors.exception.Exception401;
-import org.example.demo_ssr_v1._core.errors.exception.Exception403;
-import org.example.demo_ssr_v1._core.errors.exception.Exception404;
-import org.example.demo_ssr_v1._core.errors.exception.Exception500;
 import org.example.demo_ssr_v1.user.User;
-
-
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,11 +11,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 
 import java.util.List;
 
+
 @RequiredArgsConstructor // DI
 @Controller // IoC
 public class BoardController {
 
-    private final BoardRepository repository;
+    private final BoardService boardService;
 
     /**
      * 게시글 수정 화면 요청
@@ -35,17 +30,13 @@ public class BoardController {
 
         // 1. 인증 검사 (0)
         User sessionUser = (User)session.getAttribute("sessionUser"); // sessionUser -> 상수
-        // LoginInterceptor가 알아서 처리해줌
+        // LoginInterceptor 가 알아서 처리 해줌 !!
 
         // 2. 인가 검사 (0)
-        Board board =  repository.findById(id);
-        if(board == null) {
-            throw new Exception500("게시글이 삭제 되었습니다.");
-        }
-        if(board.isOwner(sessionUser.getId())==false){
-            throw new Exception403("게시글 수정 권한이 없습니다.");
-        }
-        model.addAttribute("board", board);
+        BoardResponse.UpdateFormDTO dto = boardService.게시글수정화면(id, sessionUser.getId());
+
+
+        model.addAttribute("board", dto);
         return "board/update-form";
     }
 
@@ -62,19 +53,10 @@ public class BoardController {
 
         // 1. 인증 처리 (o)
         User sessionUser =  (User)session.getAttribute("sessionUser");
-        // LoginInterceptor가 알아서 처리해줌
+        // LoginInterceptor 가 알아서 처리 해줌 !!
 
-        Board board = repository.findById(id);
-        if(board.isOwner(sessionUser.getId())==false){
-            throw new Exception403("게시글 수정 권한이 없습니다.");
-        }
-
-        try {
-            repository.updateById(id, updateDTO);
-            // 더티 체킹 활용
-        } catch (Exception e) {
-            throw new RuntimeException("게시글 수정 실패");
-        }
+        BoardResponse.UpdateFormDTO dto = boardService.게시글수정(updateDTO,id, sessionUser.getId());
+        session.setAttribute("sessionUser", dto);
         return "redirect:/board/list";
     }
 
@@ -85,13 +67,11 @@ public class BoardController {
      * @return
      */
     @GetMapping({"/board/list", "/"})
-    public String boardList(Model model) {
-//        throw new Exception403("너는 못 지나간다.");
-        List<Board> boardList = repository.findAll();
+    public String boardList(Model model, HttpSession session) {
+        List<BoardResponse.ListDTO> boardList = boardService.게시글목록조회();
         model.addAttribute("boardList", boardList);
         return "board/list";
     }
-
 
     /**
      * 게시글 작성 화면 요청
@@ -101,8 +81,7 @@ public class BoardController {
     @GetMapping("/board/save")
     public String saveForm(HttpSession session) {
         User sessionUser = (User) session.getAttribute("sessionUser");
-        // LoginInterceptor가 알아서 처리해줌
-
+        // LoginInterceptor 가 알아서 처리 해줌 !!
         return "board/save-form";
     }
 
@@ -114,12 +93,8 @@ public class BoardController {
      */
     @PostMapping("/board/save")
     public String saveProc(BoardRequest.SaveDTO saveDTO, HttpSession session) {
-        // 1. 인증 처리 확인
         User sessionUser = (User) session.getAttribute("sessionUser");
-        // LoginInterceptor가 알아서 처리해줌
-
-        Board board = saveDTO.toEntity(sessionUser);
-        repository.save(board);
+        boardService.게시글작성(saveDTO, sessionUser);
         return "redirect:/";
     }
 
@@ -131,17 +106,9 @@ public class BoardController {
      */
     @PostMapping("/board/{id}/delete")
     public String delete(@PathVariable Long id, HttpSession session) {
-        // 1. 인증 처리 (o)
-        // 1. 인증 처리 확인
         User sessionUser = (User) session.getAttribute("sessionUser");
-        // LoginInterceptor가 알아서 처리해줌
+        boardService.게시글삭제(id, sessionUser.getId());
 
-        // 2. 인가 처리 (o) || 관리자 권한
-        Board board = repository.findById(id);
-        if(board.isOwner(sessionUser.getId())==false){
-            throw new Exception403("게시글 삭제 권한이 없습니다.");
-        }
-        repository.deleteById(id);
         return "redirect:/";
     }
 
@@ -152,13 +119,18 @@ public class BoardController {
      * @return
      */
     @GetMapping("board/{id}")
-    public String detail(@PathVariable Long id, Model model) {
-        Board board = repository.findById(id);
-        // LoginInterceptor가 알아서 처리해줌
+    public String detail(@PathVariable Long id, Model model, HttpSession session) {
+        BoardResponse.DetailDTO dto = boardService.게시글상세조회(id);
+        // 세션에 로그인 사용자 정보 조회(없을 수 도 있음)
+        User sessionUser = (User)  session.getAttribute("sessionUser");
+        boolean isOwner = false;
+        if(sessionUser != null && dto.getUsername() != null){
+            isOwner = dto.getUserId().equals(sessionUser.getId());
+        }
 
-        model.addAttribute("board", board);
+        model.addAttribute("isOwner", isOwner);
+        model.addAttribute("board", dto);
         return "board/detail";
     }
-
 
 }

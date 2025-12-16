@@ -2,7 +2,6 @@ package org.example.demo_ssr_v1.user;
 
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
-import org.example.demo_ssr_v1._core.errors.exception.Exception401;
 import org.example.demo_ssr_v1._core.errors.exception.Exception403;
 import org.example.demo_ssr_v1._core.errors.exception.Exception404;
 import org.springframework.stereotype.Controller;
@@ -17,74 +16,42 @@ import org.springframework.web.bind.annotation.PostMapping;
  * - 요청 데이터 검증 및 파라미터 바인터 바인딩
  * - Service 레이어에 비즈니스 로직을 위함
  * - 응답 데이터를 View에 전달 함
- *
  */
 @Controller
 @RequiredArgsConstructor
 public class UserController {
 
-    private final UserRepository userRepository;
+    private final UserService userService;
+    // 객체 지향 개념 --> SOLID 원칙
+    // DIP - 추상화가 높은 녀석을 선언하는 것이 좋다.
+
 
     // 회원정보 수정 화면 요청
     // http://localhost:8080/user/update
     @GetMapping("/user/update")
     public String updateForm(Model model, HttpSession session) {
-        // HttpServletRequest
-        // A 사용자가 요청시 -> 웹 서버 -> 톰캣(WAS) Request 객체와 Response 객체를 만들어서
-        // 스프링 컨테이너에게 전달해줌
-
-        // 1. 인증 검사 해야함
-        // 인증 검사를 진행하려면 세션 메모리에 접근해서 사용자의 정보가 있는지 없는지 여부 확인
         User sessionUser = (User) session.getAttribute("sessionUser");
-        // LoginInterceptor가 알아서 처리해줌
-
-
-        // 2. 인가 처라ㅣ
-        // 세션의 사용자 ID로 회원 정보 조회
-        User user = userRepository.findById(sessionUser.getId());
-        if (user == null) {
-            throw new Exception404("사용자를 찾을 수 없음");
-        }
-        if (!user.isOwner(sessionUser.getId())) {
-            throw new Exception403("권한 없음");
-        }
-
-        // 밑으로 온다면 로그인 했던 사용자가 맞음
-
+        User user = userService.회원정보수정화면(sessionUser.getId());
         model.addAttribute("user", user);
-
         return "user/update-form";
     }
 
     // 회원정보 수정 기능 요청 - Dirty Checking
     @PostMapping("/user/update")
     public String updateProc(UserRequest.UpdateDTO updateDTO, HttpSession session) {
-        // 1. 인증 검사
         User sessionUser = (User) session.getAttribute("sessionUser");
-        // LoginInterceptor가 알아서 처리해줌
 
-        // 인가 처리(DB 정보 조회)
-        User user = userRepository.findById(sessionUser.getId());
-        if(user == null){
-            throw new Exception404("사용자 잧을 수 없음");
-        }
-        if(!user.isOwner(sessionUser.getId())){
-            throw new Exception403("회원정보 수정 권한 없음");
-        }
-
-        // 2. 유효성 검사
-        // 3. 세션 메모리에 있던 기존 상태값을 변경 처리
         try {
+            // 유효성 검사(형식 검사)
             updateDTO.validate();
-            User updateUser = userRepository.updateById(sessionUser.getId(), updateDTO);
-            // 세션에 정보 갱신
+            User updateUser = userService.회원정보수정(updateDTO, sessionUser.getId());
+            // 회원 정보 수정은 - 세션 갱신해 주어야 한다.
             session.setAttribute("sessionUser", updateUser);
-            // 수저 후 리다이렉트 처리 - 게시판 목록
-
             return "redirect:/";
         } catch (Exception e) {
             return "user/update-form";
         }
+
     }
 
 
@@ -109,18 +76,10 @@ public class UserController {
     // 로그인 기능 요청
     @PostMapping("/login")
     public String loginProc(UserRequest.LoginDTO loginDTO, HttpSession session) {
-        // 1. 인증 검사 필요 없음
-        // 2. 유효성 검사
-        // 3. db에 사용자 이름과 비밀번호 확인
-        // 4. 로그인 성공 또는 실패 처리
-        // 5. 웹 서버는 바보라 사용자의 정보를 세션메모리에 저장 시켜야 다음 번 요청이 오더라도 알 수 있음
+
         try {
             loginDTO.validate();
-            User sessionUser = userRepository.findByUsernameAndPassword(loginDTO.getUsername(), loginDTO.getPassword());
-            if (sessionUser == null) {
-                throw new IllegalArgumentException("사용자명 또는 비밀번호가 올바르지 않습니다.");
-            }
-            // 세션에 저장
+            User sessionUser = userService.로그인(loginDTO);
             session.setAttribute("sessionUser", sessionUser);
 
             return "redirect:/";
@@ -143,17 +102,10 @@ public class UserController {
     // 회원가입 기능 요청
     @PostMapping("/join")
     public String joinProc(UserRequest.JoinDTO joinDTO) {
-        // 1. 인증검사 필요없음(회원가입)
-        // 2. 유효성 검사 (엉망인 데이터를 저장할 수 없음)
-        // 3. 사용자 이름 중복 체크
-        // 4. 저장 요청
         joinDTO.validate();
-        User existingUser = userRepository.findByUsername(joinDTO.getUsername());
-        if (existingUser != null) {
-            throw new IllegalArgumentException("이미 존재하는 사용자 이름 입니다.");
-        }
-        User user = joinDTO.toEntity();
-        userRepository.save(user);
+        userService.회원가입(joinDTO);
+
+//        userRepository.save(user);
         return "redirect:/login";
     }
 

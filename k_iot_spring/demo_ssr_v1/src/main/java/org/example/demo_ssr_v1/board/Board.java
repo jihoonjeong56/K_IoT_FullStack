@@ -43,7 +43,7 @@ public class Board {
         this.title = updateDTO.getTitle();
         this.content = updateDTO.getContent();
         // 게시글 수정은 작성자를 변경할 수 없다
-//        this.user = updateDTO.getUsername();
+//        this.user  = updateDTO.getUsername();
     }
 
     // 게시글 소윻자 확인 로직

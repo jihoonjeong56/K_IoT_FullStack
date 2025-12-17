@@ -30,10 +30,20 @@ public class WebMvcConfig implements WebMvcConfigurer {
         //  /board/**
         //  /user/**
         //  --> 단 특정 URL은 제외 시킬거임
-        registry.addInterceptor(loginInterceptor).addPathPatterns("/board/**", "/user/**")
-                .excludePathPatterns("/login", "/join", "/logout", "/board/list", "/", "/board/{id:\\d+}",
-                        "/css/**", "/js/**", "/images/**",
-                        "/favicon.io", "/h2-console/**"
+        registry.addInterceptor(loginInterceptor)
+                .addPathPatterns("/board/**", "/user/**", "/reply/**")
+                .excludePathPatterns(
+                        "/login",
+                        "/join",
+                        "/logout",
+                        "/board/list",
+                        "/",
+                        "/board/{id:\\d+}",
+                        "/css/**",
+                        "/js/**",
+                        "/images/**",
+                        "/favicon.io",
+                        "/h2-console/**"
                 );
         // \\d+는 정규표현식으로 1개 이상의 숫자를 의미함
     }

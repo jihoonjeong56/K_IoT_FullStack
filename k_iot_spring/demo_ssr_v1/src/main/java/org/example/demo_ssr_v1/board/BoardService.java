@@ -2,17 +2,16 @@ package org.example.demo_ssr_v1.board;
 
 
 import lombok.RequiredArgsConstructor;
-
 import org.example.demo_ssr_v1._core.errors.exception.Exception403;
 import org.example.demo_ssr_v1._core.errors.exception.Exception404;
+import org.example.demo_ssr_v1.reply.ReplyRepository;
 import org.example.demo_ssr_v1.user.User;
-import org.example.demo_ssr_v1.user.UserRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -20,38 +19,72 @@ import java.util.stream.Collectors;
 public class BoardService {
 
     private final BoardRepository boardRepository;
+    private final ReplyRepository replyRepository;
 
     /**
-     * 게시글 목록 조회
+     * 페이지 목록 조회
      * 트랜잭션
      *  - 읽기 전용 트랜잭션 - 성능 최적화
      * @return 게시글 목록 (생성일 기준으로 내림차순)
      */
-    public List<BoardResponse.ListDTO> 게시글목록조회() {
-        // 자바 문법
-        // 데이터 타입을 변환해서 맞춰 주어야 한다
-        List<Board> boardList = boardRepository.findAllWithUserOrderByCreatedAtDesc();
-        // List<Board> ---> List<BoardResponse.ListDto>
+    public BoardResponse.PageDTO 게시글목록조회(int page, int size) {
 
-        // 1. 반복문
-//        List<BoardResponse.ListDto> dtoList = new ArrayList<>();
-//        for(Board board : boardList) {
-//            BoardResponse.ListDto dto = new BoardResponse.ListDto(board);
-//            dtoList.add(dto);
-//        }
+        // page 는 0부터 시작
+        // 상한선 제한
+        // size는 기본값 5, 최소 1, 최대 50 제한
+        // 페이지 번호가 음수가 되는것을 막음
+        int validPage = Math.max(0, page); // 양수값 보장
+        // 최대값 제한 -> 최대값 제한 50으로 보장
+        // 최소값 제한 -> 1, -50 양수값 보장(최소값)
+        int validSize = Math.max(1, Math.min(50, size));
 
-        // return dtoList;
+        Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
+        Pageable pageable = PageRequest.of(validPage, validSize, sort);
 
-        // 2. 람다 표현식
-//        return boardList.stream()
-//                .map(board -> new BoardResponse.ListDto(board))
-//                .collect(Collectors.toList());
 
-        // 3. 참조 메서드
-        return boardList.stream()
-                .map(BoardResponse.ListDTO::new)
-                .collect(Collectors.toList());
+        // Page<Board>
+        Page<Board> boardPage = boardRepository.findAllWithUserOrderByCreatedAtDesc(pageable);
+
+
+
+        return new BoardResponse.PageDTO(boardPage);
+
+
     }
+
+
+//
+//    /**
+//     * 게시글 목록 조회
+//     * 트랜잭션
+//     *  - 읽기 전용 트랜잭션 - 성능 최적화
+//     * @return 게시글 목록 (생성일 기준으로 내림차순)
+//     */
+//    public List<BoardResponse.ListDTO> 게시글목록조회() {
+//        // 자바 문법
+//        // 데이터 타입을 변환해서 맞춰 주어야 한다
+//        List<Board> boardList = boardRepository.findAllWithUserOrderByCreatedAtDesc();
+//        // List<Board> ---> List<BoardResponse.ListDto>
+//
+//        // 1. 반복문
+////        List<BoardResponse.ListDto> dtoList = new ArrayList<>();
+////        for(Board board : boardList) {
+////            BoardResponse.ListDto dto = new BoardResponse.ListDto(board);
+////            dtoList.add(dto);
+////        }
+//
+//        // return dtoList;
+//
+//        // 2. 람다 표현식
+////        return boardList.stream()
+////                .map(board -> new BoardResponse.ListDto(board))
+////                .collect(Collectors.toList());
+//
+//        // 3. 참조 메서드
+//        return boardList.stream()
+//                .map(BoardResponse.ListDTO::new)
+//                .collect(Collectors.toList());
+//    }
 
     public BoardResponse.DetailDTO 게시글상세조회(Long boardId) {
 
@@ -122,6 +155,7 @@ public class BoardService {
             throw new Exception403("삭제 권한이 없습니다.");
         }
         // 4.
+        replyRepository.deleteByBoardId(boardId);
         boardRepository.deleteById(boardId);
     }
 }

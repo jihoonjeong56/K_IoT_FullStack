@@ -1,9 +1,17 @@
 package org.example.demo_ssr_v1.board;
 
-import lombok.Data;
-import org.example.demo_ssr_v1._core.utils.MyDateUtil;
-import org.example.demo_ssr_v1.user.User;
 
+import lombok.Data;
+
+import org.example.demo_ssr_v1._core.utils.MyDateUtil;
+import org.springframework.data.domain.Page;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * 응답 DTO
+ */
 public class BoardResponse {
 
     /**
@@ -13,22 +21,23 @@ public class BoardResponse {
     public static class ListDTO {
         private Long id;
         private String title;
-        private String username;
+        private String username; // 작성자명 (평탄화) {{board.username}} -> {{board.user.username}}
         private String createdAt;
 
         public ListDTO(Board board) {
             this.id = board.getId();
             this.title = board.getTitle();
             // 쿼리 --> JOIN FETCH 로 가져오면 문제 없음
-            if (board.getUser().getUsername() != null) {
+            if(board.getUser() != null) {
+                System.out.println("test11");
                 this.username = board.getUser().getUsername();
             }
-            if (board.getCreatedAt() != null) {
+            // 날짜 포맷팅
+            if(board.getCreatedAt() != null) {
                 this.createdAt = MyDateUtil.timestampFormat(board.getCreatedAt());
             }
         }
     } // end of static inner class
-
 
     /**
      * 게시글 상세 응답 DTO
@@ -47,11 +56,12 @@ public class BoardResponse {
             this.title = board.getTitle();
             this.content = board.getContent();
             // JOIN FETCH 활용 (한번에 JOIN 에서 Repository 에서 가지고 올 예정)
-            if (board.getUser() != null) {
+            if(board.getUser() != null) {
                 this.userId = board.getUser().getId();
                 this.username = board.getUser().getUsername();
             }
-            if (board.getCreatedAt() != null) {
+            // 날짜 포맷팅
+            if(board.getCreatedAt() != null) {
                 this.createdAt = MyDateUtil.timestampFormat(board.getCreatedAt());
             }
         }
@@ -61,18 +71,82 @@ public class BoardResponse {
      * 게시글 수정 화면 응답 DTO
      */
     @Data
-    public static class UpdateFormDTO{
+    public static class UpdateFormDTO {
         private Long id;
         private String title;
         private String content;
-        private String username;
 
         public UpdateFormDTO(Board board) {
             this.id = board.getId();
             this.title = board.getTitle();
             this.content = board.getContent();
-            this.username = board.getUser().getUsername();
         }
     }
 
-}
+    @Data
+    public static class PageDTO {
+
+        private List<ListDTO> content;
+        private int number; // 현재 페이지 번호 (0 부터 시작)
+        private int size; // 한 페이지의 크기(보여줄 개수)
+        private int totalPages; // 전체 페이지 수
+        private Long totalElements; // 전체 게시글 수
+        private boolean first; // 첫 페이지 여부
+        private boolean last; // 마지막 페이지 여부
+        private boolean hasNext; // 다음 페이지 존재 여부
+        private boolean hasPrevious; // 이전 페이지 존재 여부
+
+        private Integer previousPageNumber; // 이전 페이지 번호(없으면 null)
+        private Integer nextPageNumber; // 다음 페이지 번호(없으면 null)
+        private List<PageLink> pageLinks; // 페이지 번호 링크 목록
+
+        public PageDTO(Page<Board> page) {
+            this.content = page.getContent().stream()
+                    .map(ListDTO::new)
+                    .toList();
+
+            this.number = page.getNumber();
+            this.size = page.getSize();
+            this.totalPages = page.getTotalPages();
+            this.totalElements = page.getTotalElements();
+            this.first = page.isFirst();
+            this.last = page.isLast();
+            this.hasNext = page.hasNext();
+            this.hasPrevious = page.hasPrevious();
+            this.previousPageNumber = page.hasPrevious() ? page.getNumber() : null;
+            this.nextPageNumber = page.hasNext() ? page.getNumber() + 2 : null;
+            // 페이지 링크 생성 (현재 기준으로 앞뒤 2 페이지 씩 표시)
+            this.pageLinks = generatePageLinks(page);
+        }
+
+        private List<PageLink> generatePageLinks(Page<Board> page) {
+            List<PageLink> links = new ArrayList<>();
+
+            int currentPage = page.getNumber() + 1;
+            int totalPages = page.getTotalPages();
+
+            // 현재 페이지 번호 5 인 상태
+            //       3 4 [5] 6 7
+            int startPage = Math.max(1, currentPage - 2);
+            int endPage = Math.min(totalPages, currentPage + 2);
+
+            for(int i = startPage; i <= endPage; i++) {
+                PageLink link = new PageLink();
+                link.setDisplayNumber(i);
+                link.setActive(i == currentPage);
+                links.add(link);
+            }
+            return links;
+        }
+    }
+
+
+    // 페이지 링크 클래스 설계
+    @Data
+    public static class PageLink {
+        private int displayNumber; // 표시할 페이지 번호(1)
+        private boolean active;
+    }
+
+
+} // end of outer class

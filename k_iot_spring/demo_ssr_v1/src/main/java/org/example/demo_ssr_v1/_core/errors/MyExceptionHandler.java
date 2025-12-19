@@ -6,10 +6,10 @@ import org.example.demo_ssr_v1._core.errors.exception.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
 
 
 //@ControllerAdvice - 모든 컨트롤러에서 발생하는 예외를 이 클래스에 중앙 집중화 시킴
@@ -34,13 +34,14 @@ public class MyExceptionHandler {
 
     // 401 인증오류
     @ExceptionHandler(Exception401.class)
-    public String ex401(Exception401 e, HttpServletRequest request){
+    public String ex401(Exception401 e, HttpServletRequest request, Model model){
         log.warn("=== 401 error ===");
         log.warn("요청 URL: {}", request.getRequestURL());
         log.warn("에러 메시지: {}", e.getMessage());
         log.warn("예외 클래스: {}", e.getClass().getSimpleName());
 
-        request.setAttribute("msg", e.getMessage());
+//        request.setAttribute("msg", e.getMessage());
+        model.addAttribute("msg", e.getMessage());
 
         return "err/401";
     }
@@ -69,13 +70,14 @@ public class MyExceptionHandler {
 
     // 404 오류
     @ExceptionHandler(Exception404.class)
-    public String ex404(Exception404 e, HttpServletRequest request){
+    public String ex404(Exception404 e, HttpServletRequest request , Model model){
         log.warn("=== 404 error ===");
         log.warn("요청 URL: {}", request.getRequestURL());
         log.warn("에러 메시지: {}", e.getMessage());
         log.warn("예외 클래스: {}", e.getClass().getSimpleName());
 
-        request.setAttribute("msg", e.getMessage());
+//        request.setAttribute("msg", e.getMessage());
+        model.addAttribute("msg", e.getMessage());
 
         return "err/404";
     }

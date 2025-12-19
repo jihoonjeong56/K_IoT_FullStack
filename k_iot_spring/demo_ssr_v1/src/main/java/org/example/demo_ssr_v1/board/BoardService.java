@@ -24,10 +24,11 @@ public class BoardService {
     /**
      * 페이지 목록 조회
      * 트랜잭션
-     *  - 읽기 전용 트랜잭션 - 성능 최적화
+     * - 읽기 전용 트랜잭션 - 성능 최적화
+     *
      * @return 게시글 목록 (생성일 기준으로 내림차순)
      */
-    public BoardResponse.PageDTO 게시글목록조회(int page, int size) {
+    public BoardResponse.PageDTO 게시글목록조회(int page, int size, String keyword) {
 
         // page 는 0부터 시작
         // 상한선 제한
@@ -40,11 +41,16 @@ public class BoardService {
 
         Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
         Pageable pageable = PageRequest.of(validPage, validSize, sort);
-
+        // [...스프링...] [검색][초기화]
+        Page<Board> boardPage;
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            boardPage = boardRepository.findByTitleContainingOrContentContaining(keyword.trim(), pageable);
+        }else{
+            boardPage = boardRepository.findAllWithUserOrderByCreatedAtDesc(pageable);
+        }
 
         // Page<Board>
-        Page<Board> boardPage = boardRepository.findAllWithUserOrderByCreatedAtDesc(pageable);
-
+//        Page<Board> boardPage = boardRepository.findByTitleContainingOrContentContaining(pageable);
 
 
         return new BoardResponse.PageDTO(boardPage);
@@ -76,16 +82,16 @@ public class BoardService {
 //        // return dtoList;
 //
 //        // 2. 람다 표현식
-////        return boardList.stream()
-////                .map(board -> new BoardResponse.ListDto(board))
-////                .collect(Collectors.toList());
+
+    /// /        return boardList.stream()
+    /// /                .map(board -> new BoardResponse.ListDto(board))
+    /// /                .collect(Collectors.toList());
 //
 //        // 3. 참조 메서드
 //        return boardList.stream()
 //                .map(BoardResponse.ListDTO::new)
 //                .collect(Collectors.toList());
 //    }
-
     public BoardResponse.DetailDTO 게시글상세조회(Long boardId) {
 
         Board board = boardRepository.findById(boardId)
@@ -112,7 +118,7 @@ public class BoardService {
         Board boardEntity = boardRepository.findById(boardId)
                 .orElseThrow(() -> new Exception404("게시글을 찾을 수 없습니다."));
         // 2 인가 처리
-        if(!boardEntity.isOwner(sessionUserId)){
+        if (!boardEntity.isOwner(sessionUserId)) {
             throw new Exception403("게시글 수정 권한이 없습니다.");
         }
 //        return new BoardResponse.UpdateFormDto(boardEntity);
@@ -131,7 +137,7 @@ public class BoardService {
                 .orElseThrow(() -> new Exception404("게시글을 찾을 수 없습니다."));
 
         // 3. 인가 처리
-        if(!boardEntity.isOwner(sessionUserId)) {
+        if (!boardEntity.isOwner(sessionUserId)) {
             throw new Exception403("게시글 수정 권한이 없습니다.");
         }
         // 4.
@@ -151,7 +157,7 @@ public class BoardService {
                 .orElseThrow(() -> new Exception404("게시글을 찾을 수 없습니다."));
 
         // 3.
-        if(!boardEntity.isOwner(sessionUserId)) {
+        if (!boardEntity.isOwner(sessionUserId)) {
             throw new Exception403("삭제 권한이 없습니다.");
         }
         // 4.

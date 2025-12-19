@@ -1,32 +1,58 @@
 package org.example.demo_ssr_v1.user;
 
+
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
-import org.example.demo_ssr_v1._core.errors.exception.Exception403;
-import org.example.demo_ssr_v1._core.errors.exception.Exception404;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 
 /**
- * 사용자 Controller (표현 계층)
- * 핵심 개념 :
- * - HTTP 요청을 받아서 처리
- * - 요청 데이터 검증 및 파라미터 바인터 바인딩
- * - Service 레이어에 비즈니스 로직을 위함
- * - 응답 데이터를 View에 전달 함
+ *  사용자 Controller (표현 계층)
+ *  핵심 개념 :
+ *  - HTTP 요청을 받아서 처리
+ *  - 요청 데이터 검증 및 파마리터 바인딩
+ *  - Service 레이어에 비즈니스 로직을 위힘
+ *  - 응답 데이터를 View 에 전달 함
+ *
  */
-@Controller
+
 @RequiredArgsConstructor
+@Controller
 public class UserController {
 
     private final UserService userService;
-    // 객체 지향 개념 --> SOLID 원칙
-    // DIP - 추상화가 높은 녀석을 선언하는 것이 좋다.
+
+    // 프로필 이미지 삭제 하기
+    @PostMapping("/user/profile-image/delete")
+    public String deleteProfileImage(HttpSession session) {
+        User sessionUser = (User) session.getAttribute("sessionUser");
+
+        User updateUser = userService.프로필이미지삭제(sessionUser.getId());
+        // 왜 user 다시 받을까? -- 세션 정보가 (즉 프로필이 삭제 되었기 때문에)
+        // 세션 정보 갱신 처리 해주기 위함이다.
+        session.setAttribute("sessionUser", updateUser); // 세션 정보 갱신
+
+        // 일반적으로 POST 요청이 오면 PRG 패턴으로 설계 됨
+        // POST -> Redirect 처리 ---> Get 요청
+        return "redirect:/user/detail";
+    }
+
+    // 마이페이지
+    // http://localhost:8080/user/detail
+    @GetMapping("/user/detail")
+    public String detail(Model model, HttpSession session) {
+        User sessionUser = (User) session.getAttribute("sessionUser");
+
+        User user = userService.마이페이지(sessionUser.getId());
+
+        model.addAttribute("user", user);
+        return "user/detail";
+    }
 
 
-    // 회원정보 수정 화면 요청
+    // 회원 정보 수정 화면 요청
     // http://localhost:8080/user/update
     @GetMapping("/user/update")
     public String updateForm(Model model, HttpSession session) {
@@ -36,23 +62,24 @@ public class UserController {
         return "user/update-form";
     }
 
-    // 회원정보 수정 기능 요청 - Dirty Checking
+
+    // 회원 정수 수정 기능 요청 - 더티 체킹
+    // http://localhost:8080/user/update
     @PostMapping("/user/update")
     public String updateProc(UserRequest.UpdateDTO updateDTO, HttpSession session) {
         User sessionUser = (User) session.getAttribute("sessionUser");
-
         try {
-            // 유효성 검사(형식 검사)
+            // 유효성 검사 (형식 검사)
             updateDTO.validate();
             User updateUser = userService.회원정보수정(updateDTO, sessionUser.getId());
             // 회원 정보 수정은 - 세션 갱신해 주어야 한다.
             session.setAttribute("sessionUser", updateUser);
-            return "redirect:/";
+            return "redirect:/user/detail";
         } catch (Exception e) {
             return "user/update-form";
         }
-
     }
+
 
 
     // 로그아웃 기능 요청
@@ -64,8 +91,6 @@ public class UserController {
         return "redirect:/";
     }
 
-
-    // JWT 토큰 기반 인증 x -> 세션 기반 인증 처리
     // 로그인 화면 요청
     // http://localhost:8080/login
     @GetMapping("/login")
@@ -73,41 +98,39 @@ public class UserController {
         return "user/login-form";
     }
 
-    // 로그인 기능 요청
+
+    // http://localhost:8080/login
     @PostMapping("/login")
     public String loginProc(UserRequest.LoginDTO loginDTO, HttpSession session) {
-
         try {
+            // 유효성 검사
             loginDTO.validate();
-            User sessionUser = userService.로그인(loginDTO);
+            User sessionUser =  userService.로그인(loginDTO);
             session.setAttribute("sessionUser", sessionUser);
-
             return "redirect:/";
         } catch (Exception e) {
             // 로그인 실패시 다시 로그인 화면으로 처리
             return "user/login-form";
         }
-
-
     }
+
+
 
 
     // 회원가입 화면 요청
     // http://localhost:8080/join
     @GetMapping("/join")
-    public String joinForm() {
+    public String joinFrom() {
         return "user/join-form";
     }
 
     // 회원가입 기능 요청
+    // http://localhost:8080/join
     @PostMapping("/join")
     public String joinProc(UserRequest.JoinDTO joinDTO) {
         joinDTO.validate();
         userService.회원가입(joinDTO);
-
-//        userRepository.save(user);
         return "redirect:/login";
     }
-
 
 }

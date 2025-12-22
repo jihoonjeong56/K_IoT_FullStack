@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 
 @NoArgsConstructor
 @Data
@@ -27,8 +29,13 @@ public class User {
     @CreationTimestamp
     private Timestamp createdAt;
 
-
     private String profileImage;
+
+
+    // 나중에 다른 개발자가 findById(쿼리 메서드 호출 할 때 신경쓸 필요 없이 전부 role 까지 반환 해줌)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @JoinColumn(name = "user_id")
+    private List<UserRole> roles = new ArrayList<>();
 
     @Builder
     public User(Long id, String username, String password, String email, Timestamp createdAt, String profileImage) {
@@ -56,5 +63,37 @@ public class User {
         return this.id.equals(userId);
     }
 
+    // 새로운 역할을 추가하는 기능
+    public void addRole(Role role) {
+        this.roles.add(UserRole.builder().role(role).build());
+    }
+
+    // 해당 역할을 가지고 있는지 확인하는 기능
+    public boolean hasRole(Role role) {
+        // role (리스트)에 컬렉션이 없거나 비어 있으면 역할이 없는 것
+        if (this.roles == null || this.roles.isEmpty()) {
+            return false;
+        }
+        // 즉시 로딩이라서 바로 사용해도 LAZY 초기화 예외 안터짐
+        // any(어떤 것이든), Match(일치하다) 즉, 리스트 안에 있는 것들 중 하나라도 조건에 맞는게 있따면
+        // true 를 반환해라
+        return this.roles.stream()
+                .anyMatch(r -> r.getRole() == role);
+    }
+
+    // 관리자이지 여부를 반환
+    public boolean isAdmin(){
+        return hasRole(Role.ADMIN);
+    }
+
+    // 탬플릿에서 {{#isAdmin}}... {{/isAdmin}} 형태로 사용하는 편의 메서드 설계
+    public boolean getIsAdmin(){
+        return isAdmin();
+    }
+
+    // 화면에 표시할 역할 문자열 제공
+    public String getRoleDisplay(){
+        return isAdmin() ? "ADMIN" : "USER";
+    }
 }
 

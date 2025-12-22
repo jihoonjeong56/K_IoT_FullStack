@@ -52,7 +52,7 @@ public class UserService {
     public User 로그인(UserRequest.LoginDTO loginDTO) {
 
         // 사용자가 던진 값과  DB에 있는 사용자 이름과 비밀번호를 확인해 주어야 한다.
-        User userEntity = userRepository.findByUsernameAndPassword(loginDTO.getUsername(),
+        User userEntity = userRepository.findByUsernameAndPasswordWithRoles(loginDTO.getUsername(),
                         loginDTO.getPassword())
                 .orElse(null); // 로그인 실패시 null 반환
 
@@ -87,32 +87,36 @@ public class UserService {
         }
 
         // 추가 - 프로필 이미지 처리
-        // 중요 : 우리 프로젝트에서는 이미지 수정도 선택사항입니다.
-        // 새로운 이미지 파일을 생성하고 기존의 이미지 파일을 삭제해야한다.
-        // 추가로 DB 정보도 업데이트 해야함.
+        // 중요 : 우리 프로젝트에서는 이미지 수정도 선택 사항 입니다.
+        // 새로운 이미지 파일을 생성하고 기존에 있던 이미지 파일을 삭제해야 한다
+        // 추가로 DB 정보도 업데이트 해야 한다.
+
         String oldProfileImage = userEntity.getProfileImage();
-        // 분기처리 - 이미지명이 있거나 null 값.
-        if(updateDTO.getProfileImage() != null && !updateDTO.getProfileImage().isEmpty()){
+        // 분기 처리 - 이미지명이 있거나 또는 null 값이다.
+        if(updateDTO.getProfileImage() != null && !updateDTO.getProfileImage().isEmpty()) {
             // 1. 이미지 파일인지 검증
-            if(!FileUtil.isImageFile(updateDTO.getProfileImage())){
-                throw new Exception400("이미지 파일만 업로드 가능합니다.");
+            if(!FileUtil.isImageFile(updateDTO.getProfileImage())) {
+                throw new Exception400("이미지 파일만 업로드 가능합니다");
             }
+
             // 2. 새 이미지 저장
             try {
                 String newProfileImageFilename = FileUtil.saveFile(updateDTO.getProfileImage());
+                // 새로 만들어진 파일 이름을 잠시 DTO에 보관 함
                 updateDTO.setProfileImageFilename(newProfileImageFilename);
-                if(oldProfileImage != null && !oldProfileImage.isEmpty()){
-                    // 기존에 있던 이미지를 삭제 처리함.
+
+                if(oldProfileImage != null && !oldProfileImage.isEmpty()) {
+                    // 기존에 있던 이미지를 삭제 처리 한다.
                     FileUtil.deleteFile(oldProfileImage);
                 }
             } catch (IOException e) {
-                throw new Exception500("파일저장에 실패 했습니다.");
+                throw new Exception500("파일 저장에 실패했습니다");
             }
+            // end of 파일이 들어 왔을 때 처리
         } else {
-            // 새 이미지가 업로드 되지 않았으면 기존 이미지 파일이름 유지
+            // 새 이미지가 업로드 되지 않았으면 기존 이미지 파일 이름 유지
             updateDTO.setProfileImageFilename(oldProfileImage);
-        } // end of 파일이 들어왔을때 처리
-
+        }
         // 객체 상태값 변경 (트랜잭션이 끝나면 자동으로 commit 및 반영해 줄꺼야)
         userEntity.update(updateDTO);
         return userEntity;

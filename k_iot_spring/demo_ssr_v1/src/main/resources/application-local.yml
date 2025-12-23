@@ -30,11 +30,12 @@ spring:
 
   # 데이터베이스 연결 설정 (H2 인메모리 데이터베이스)
   datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    driver-class-name: org.h2.Driver
     # MODE=MySQL: H2를 MySQL 호환 모드로 실행
-    url: jdbc:mysql://localhost:3306/myblog?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
-    username: root
-    password: root
+    url: jdbc:h2:mem:test;MODE=MySQL
+    username: sa
+    password:
+
 
   # H2 데이터베이스 웹 콘솔 활성화 (개발용)
   # localhost:8080/h2-console로 접속 가능
@@ -74,3 +75,10 @@ spring:
     # - false : 트랜젝션 종류 시 세션 종류 (LAZY 로딩 불가, 명시적 조회 필요(트리거))
     # - false 설정 시 Service 에서 필요한 데이터를 모두 조회 하고 DTO로 변환 해야함
     open-in-view: false
+
+oauth:
+  kakao:
+    client-id: ${KAKAO_CLIENT_ID}
+
+tenco:
+  key: ${TENCO_KEY}

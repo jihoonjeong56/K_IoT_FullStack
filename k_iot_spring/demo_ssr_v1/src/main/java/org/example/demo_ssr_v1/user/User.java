@@ -112,9 +112,11 @@ public class User {
         return this.provider == OAuthProvider.LOCAL;
     }
 
-    public boolean getIsLocal(){
-        return isLocal();
-    }
+
+
+//    public boolean getIsLocal(){
+//        return isLocal();
+//    }
 
 
 

@@ -5,7 +5,10 @@ import lombok.RequiredArgsConstructor;
 import org.example.demo_ssr_v1._core.interceptor.AdminInterceptor;
 import org.example.demo_ssr_v1._core.interceptor.LoginInterceptor;
 import org.example.demo_ssr_v1._core.interceptor.SessionInterceptor;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -82,6 +85,10 @@ public class WebMvcConfig implements WebMvcConfigurer {
         // 파일 시스템에서 절대 경로 를 의미하는 URI 표기법은 -> ///: 이다.
         // file:images/  앞에 슬러시가 없기 때문에 상대 경로를 의미한다.
         // file:///D:upload/ <-- 내 컴퓨터 절대 경로를 의미한다.
+    }
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 }
 

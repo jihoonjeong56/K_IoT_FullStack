@@ -1,5 +1,7 @@
 package org.example.demo_ssr_v1.user;
+
 import lombok.Data;
+import org.example.demo_ssr_v1._core.errors.exception.Exception400;
 import org.springframework.web.multipart.MultipartFile;
 
 public class UserRequest {
@@ -10,10 +12,10 @@ public class UserRequest {
         private String password;
 
         public void validate() {
-            if(username == null  || username.trim().isEmpty()) {
+            if (username == null || username.trim().isEmpty()) {
                 throw new IllegalArgumentException("사용자명을 입력해주세요");
             }
-            if(password == null || password.trim().isEmpty()) {
+            if (password == null || password.trim().isEmpty()) {
                 throw new IllegalArgumentException("비밀번호를 입력해주세요");
             }
         }
@@ -30,16 +32,16 @@ public class UserRequest {
         private MultipartFile profileImage;
 
         public void validate() {
-            if(username == null  || username.trim().isEmpty()) {
+            if (username == null || username.trim().isEmpty()) {
                 throw new IllegalArgumentException("사용자명을 입력해주세요");
             }
-            if(password == null || password.trim().isEmpty()) {
+            if (password == null || password.trim().isEmpty()) {
                 throw new IllegalArgumentException("비밀번호를 입력해주세요");
             }
-            if(email == null || email.trim().isEmpty()) {
+            if (email == null || email.trim().isEmpty()) {
                 throw new IllegalArgumentException("이메일을 입력해주세요");
             }
-            if(email.contains("@") == false) {
+            if (email.contains("@") == false) {
                 throw new IllegalArgumentException("올바른 이메일 형식이 아닙니다");
             }
         }
@@ -65,11 +67,28 @@ public class UserRequest {
         // username 은 제외: 변경 불가는한 고유 식별자
 
         public void validate() {
-            if(password == null || password.trim().isEmpty()) {
+            if (password == null || password.trim().isEmpty()) {
                 throw new IllegalArgumentException("비밀번호를 입력해주세요");
             }
-            if(password.length() < 4) {
+            if (password.length() < 4) {
                 throw new IllegalArgumentException("비밀번호는 4글자 이상이어야 합니다");
+            }
+        }
+    }
+
+    @Data
+    public static class EmailCheckDTO {
+        private String email;
+        private String code;
+
+        // 추후 이메일 인증번호도 추가할 예정
+        public void validate() {
+            if (email == null || email.trim().isEmpty()) {
+                // 추후 수정
+                throw new Exception400("이메일을 입력해 주세요");
+            }
+            if (!email.contains("@")) {
+                throw new Exception400("올바른 이메일 형식이 아닙니다.");
             }
         }
     }

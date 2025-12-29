@@ -30,6 +30,9 @@ public class UserService {
     @Value("${oauth.kakao.client-id}")
     private String clientId;
 
+    @Value("${oauth.kakao.client-secret}")
+    private  String clientSecret;
+
     @Value("${tenco.key}")
     private String tencoKey;
 
@@ -68,7 +71,7 @@ public class UserService {
         tokenParams.add("redirect_uri", "http://localhost:8080/user/kakao");
         tokenParams.add("code", code);
         //TODO - env 파일에 옮겨야 함 시크릿 키 추가(노출 금지)
-        tokenParams.add("client_secret", "z6DfROeC0r0Mde4VkQJtzPtSaNSl0QU0");
+        tokenParams.add("client_secret", clientSecret);
 
 
         HttpEntity<MultiValueMap<String, String>> tokenRequest = new HttpEntity<>(tokenParams, tokenHeaders);

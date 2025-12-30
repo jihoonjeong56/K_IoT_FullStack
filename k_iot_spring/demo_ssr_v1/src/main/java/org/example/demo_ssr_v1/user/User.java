@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 
 import lombok.NoArgsConstructor;
+import org.example.demo_ssr_v1._core.errors.exception.Exception400;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -25,7 +26,13 @@ public class User {
     @Column(unique = true)
     private String username;
     private String password;
+
+    @Column(unique = true)
     private String email;
+
+    @Column(nullable = false)
+    @ColumnDefault("0")
+    private Integer point = 0;
 
     @CreationTimestamp
     private Timestamp createdAt;
@@ -44,7 +51,7 @@ public class User {
 
     @Builder
     public User(Long id, String username, String password, String email, Timestamp createdAt, String profileImage,
-                OAuthProvider provider) {
+                OAuthProvider provider, Integer point) {
         this.id = id;
         this.username = username;
         this.password = password;
@@ -54,11 +61,14 @@ public class User {
         this.provider = provider;
 
         // 방어적 코드 작성
-        if(provider == null){
+        if (provider == null) {
             this.provider = OAuthProvider.LOCAL;
-        }else{
+        } else {
             this.provider = provider;
         }
+
+        this.point = (point != null) ? point : 0;
+
     }
 
     // 회원정보 수정 비즈니스 로직 추가
@@ -96,44 +106,62 @@ public class User {
     }
 
     // 관리자이지 여부를 반환
-    public boolean isAdmin(){
+    public boolean isAdmin() {
         return hasRole(Role.ADMIN);
     }
 
     // 탬플릿에서 {{#isAdmin}}... {{/isAdmin}} 형태로 사용하는 편의 메서드 설계
-    public boolean getIsAdmin(){
+    public boolean getIsAdmin() {
         return isAdmin();
     }
-
-
-
 
     private boolean isLocal() {
         return this.provider == OAuthProvider.LOCAL;
     }
 
-
-
-//    public boolean getIsLocal(){
-//        return isLocal();
-//    }
-
+    /**
+     * 포인트 차감
+     * @param amount
+     * @throws Exception400 포인트가 부족할 경우
+     */
+    // 포인트 -> 포인트 추가, 포인트 차감
+    public void deductPoint(Integer amount){
+        if(amount == null || amount <= 0){
+            throw new Exception400("차감할 포인트는 0보다 커야 합니다.ㅏ");
+        }
+        if(this.point < amount){
+            throw new Exception400("포인트가 부족합니다. 현재 포인트 : " + this.point);
+        }
+//        this.point = this.point - amount;
+        this.point -= amount;
+    }
+    /**
+     * 포인트 증가
+     * @param amount
+     * @throws Exception400 포인트가 부족할 경우
+     */
+    // 포인트 -> 포인트 추가, 포인트 차감
+    public void chargePoint(Integer amount){
+        if(amount == null || amount <= 0){
+            throw new Exception400("충전할 포인트는 0보다 커야 합니다.ㅏ");
+        }
+        this.point += amount;
+    }
 
 
     // 화면에 표시할 역할 문자열 제공
-    public String getRoleDisplay(){
+    public String getRoleDisplay() {
         return isAdmin() ? "ADMIN" : "USER";
     }
 
 
-
     // 분기처리(머스테치 화면에서는 서버에 저장된 이미지든, URL 이미지든 그냥 getProfilePath 변수를 호출하면 알아서 세팅되게하고 싶다.
-    public String getProfilePath(){
-        if(this.profileImage == null){
+    public String getProfilePath() {
+        if (this.profileImage == null) {
             return null;
         }
         // https 로 싲가하면 소셜 이미지 URL 그대로 리턴
-        if(this.profileImage.startsWith("http")){
+        if (this.profileImage.startsWith("http")) {
             return this.profileImage;
         }
         // 아니면 (로컬 이미지) 폴더 경로 붙여서 리턴

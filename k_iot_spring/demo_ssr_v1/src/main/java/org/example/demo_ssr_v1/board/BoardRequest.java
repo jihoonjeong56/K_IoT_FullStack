@@ -1,4 +1,5 @@
 package org.example.demo_ssr_v1.board;
+
 import lombok.Data;
 import org.example.demo_ssr_v1.user.User;
 
@@ -13,9 +14,15 @@ public class BoardRequest {
         private String title;
         private String content;
         private User user;
+        private Boolean premium;
 
         public Board toEntity(User user) {
-            return new Board(title, content, user);
+            return Board.builder()
+                    .title(title)
+                    .content(content)
+                    .user(user)
+                    .premium(premium != null ? premium : false)
+                    .build();
         }
     }
 
@@ -24,14 +31,15 @@ public class BoardRequest {
         private String title;
         private String content;
         private String username;
+        private Boolean premium;
 
         // 검증 메서드
         public void validate() {
-            if(title == null || title.trim().isEmpty()) {
+            if (title == null || title.trim().isEmpty()) {
                 throw new IllegalArgumentException("제목은 필수 입니다.");
             }
 
-            if(content == null || content.trim().isEmpty()) {
+            if (content == null || content.trim().isEmpty()) {
                 throw new IllegalArgumentException("내용은 필수 입니다.");
             }
         }

@@ -4,6 +4,7 @@ package org.example.demo_ssr_v1.board;
 import lombok.Data;
 
 import org.example.demo_ssr_v1._core.utils.MyDateUtil;
+import org.example.demo_ssr_v1.purchase.Purchase;
 import org.springframework.data.domain.Page;
 
 import java.util.ArrayList;
@@ -50,11 +51,16 @@ public class BoardResponse {
         private Long userId;
         private String username;
         private String createdAt;
+        private Boolean premium;
+        private Boolean isPurchased;
+        // 로그인한 사용자가 이 게시글을 구매 했는지 확인 여부 (단, 작성자는 제외)
 
-        public DetailDTO(Board board) {
+        public DetailDTO(Board board, Boolean isPurchased) {
             this.id = board.getId();
             this.title = board.getTitle();
             this.content = board.getContent();
+
+
             // JOIN FETCH 활용 (한번에 JOIN 에서 Repository 에서 가지고 올 예정)
             if(board.getUser() != null) {
                 this.userId = board.getUser().getId();
@@ -64,6 +70,10 @@ public class BoardResponse {
             if(board.getCreatedAt() != null) {
                 this.createdAt = MyDateUtil.timestampFormat(board.getCreatedAt());
             }
+            // 유료 게시글 여부 추가
+            this.premium = board.getPremium();
+            // 구매 여부 추가
+            this.isPurchased = isPurchased;
         }
     } // end of class
 

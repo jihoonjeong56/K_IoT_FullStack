@@ -14,7 +14,6 @@ public class MailService {
 
 
     // Bean Config 만들어줘야함!
-
     private final JavaMailSender javaMailSender;
     private final HttpSession session;
 

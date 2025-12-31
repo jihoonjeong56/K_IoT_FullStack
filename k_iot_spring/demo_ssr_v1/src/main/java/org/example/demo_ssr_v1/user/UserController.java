@@ -25,6 +25,15 @@ public class UserController {
 
     private final UserService userService;
 
+    // /user/point/charge
+    @GetMapping("/user/point/charge")
+    public String chargePointForm(Model model, HttpSession session) {
+        User sessionUser = (User) session.getAttribute("sessionUser");
+
+        model.addAttribute("user", sessionUser);
+        return "user/charge-point";
+    }
+
     // [흐름] 1. 인가코드 받기 -> 2. 토큰(JWT) 발급 요청 -> 3. JWT 으로 사용자 정보 요청 -> 4. 우리 서버에 로그인/회원가입 처리
     @GetMapping("/user/kakao")
     public String kakaoCallback(@RequestParam(name = "code") String code, HttpSession session) {

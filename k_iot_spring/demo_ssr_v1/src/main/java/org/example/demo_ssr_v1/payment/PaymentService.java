@@ -4,6 +4,8 @@ package org.example.demo_ssr_v1.payment;
 import lombok.RequiredArgsConstructor;
 import org.example.demo_ssr_v1._core.errors.exception.Exception400;
 import org.example.demo_ssr_v1._core.errors.exception.Exception404;
+import org.example.demo_ssr_v1.refund.Refund;
+import org.example.demo_ssr_v1.refund.RefundRepository;
 import org.example.demo_ssr_v1.user.User;
 import org.example.demo_ssr_v1.user.UserRepository;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,10 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +22,7 @@ import java.util.UUID;
 public class PaymentService {
     private final PaymentRepository paymentRepository;
     private final UserRepository userRepository;
+    private final RefundRepository refundRepository;
 
     @Value("${portone.imp-key}")
     private String impKey;
@@ -107,15 +107,15 @@ public class PaymentService {
             );
             // 응답 데이터 추출
             PaymentResponse.PortOnePaymentResponse.PaymentData data = response.getBody().getResponse();
-            if(data == null){
+            if (data == null) {
                 throw new Exception400("결제 정보를 찾을 수 없습니다.");
             }
             // 데이터 무결성 검증
-            if(!"paid".equals(data.getStatus())){
+            if (!"paid".equals(data.getStatus())) {
                 throw new Exception400("결제과 완료되지 않았습니다.");
             }
 
-            if(!merchantUid.equals(data.getMerchantUid())){
+            if (!merchantUid.equals(data.getMerchantUid())) {
                 throw new Exception400("주문번호가 일치하지 않습니다.");
             }
             return data;
@@ -157,9 +157,46 @@ public class PaymentService {
         }
     }
 
+    // 결제 내역 목록 조회
+    // 환불 요청 상태를 확인하여 isRefundable 를 결정해야한다.
+    // 결제 상태가 paid -> 환불 요청이 없음
+    // 결제 상태가 paid -> 환불 요청 대기중 이거나 승인이 된 상태
+    // 결제상태가 cancelled -> 이미 관리자가 거절한 상태
     public List<PaymentResponse.ListDTO> 결제내역조회(Long userId) {
         List<Payment> paymentList = paymentRepository.findAllByUserId(userId);
         return paymentList.stream()
-                .map(PaymentResponse.ListDTO::new).toList();
+                .map(payment -> {
+                    // 환불 요청 조회
+                    // 결제 PK 값으로 환불 테이블에 이력이 있는지 없는지 조회
+                    Optional<Refund> refundOpt =
+                            refundRepository.findByPaymentId(payment.getId());
+                    // 환불 요청이 있는 경우 상태 확인
+                    // 요청이 있으면 true, 화면에 환불 요청 버튼이 보이면 안됨;
+                    boolean hasRefundRequest = refundOpt.isPresent();
+                    boolean isRefundable = false;
+                    if ("paid".equals(payment.getStatus())) {
+                        // 1. 결제 완료인 상태
+                        if (!hasRefundRequest) {
+                            // 환불 요청이 없는 상태 -> 환불이 가능한 상태
+                            isRefundable = true;
+                        } else {
+                            // 환불 요청 대기 상태 --> 원래 false 임(즉 화면에 버튼 안보임)
+                            Refund refund = refundOpt.get();
+                            if (refund.isRejected()) {
+                                isRefundable = true;
+                            } else {
+                                // 대기중 / 환불 완료
+                                isRefundable = false;
+                            }
+                        }
+                    } else {
+                        // 환불 완료 상태(돈 내어줌)
+                        isRefundable = false;
+                    }
+                    return new PaymentResponse.ListDTO(payment, isRefundable);
+                }).toList();
+
+//        return paymentList.stream()
+//                .map(PaymentResponse.ListDTO::new).toList();
     }
 }

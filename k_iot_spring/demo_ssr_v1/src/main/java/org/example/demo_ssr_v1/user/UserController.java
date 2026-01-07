@@ -44,13 +44,14 @@ public class UserController {
     }
 
     @GetMapping("/user/payment/list")
-    public String paymentList(Model model, HttpSession session){
+    public String paymentList(Model model, HttpSession session) {
+
         User sessionUser = (User) session.getAttribute("sessionUser");
-        List<PaymentResponse.ListDTO> paymentList = paymentService.결제내역조회(sessionUser.getId());
+        List<PaymentResponse.ListDTO> paymentList
+                = paymentService.결제내역조회(sessionUser.getId());
         model.addAttribute("paymentList", paymentList);
         return "user/payment-list";
     }
-
 
     // /user/point/charge
     @GetMapping("/user/point/charge")

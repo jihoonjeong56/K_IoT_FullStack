@@ -41,7 +41,7 @@ public class Payment {
     private String status;
 
     @CreationTimestamp
-    private Timestamp timestamp;
+    private Timestamp createdAt;
 
     @Builder
     public Payment(String impUid, String merchantUid, User user, Integer amount, String status, Timestamp timestamp) {
@@ -50,6 +50,9 @@ public class Payment {
         this.user = user;
         this.amount = amount;
         this.status = status;
-        this.timestamp = timestamp;
+        this.createdAt = timestamp;
     }
+
+
+
 }

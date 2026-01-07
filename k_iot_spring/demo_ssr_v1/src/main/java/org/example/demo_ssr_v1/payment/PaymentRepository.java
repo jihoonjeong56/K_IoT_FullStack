@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface PaymentRepository extends JpaRepository<Payment, Long> {
@@ -18,4 +19,5 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
     @Query("SELECT COUNT(p) > 0 FROM Payment p WHERE p.merchantUid = :merchantUid")
     boolean existsByMerchantUid(@Param("merchantUid") String merchantUid);
 
+    List<Payment> findAllByUserId(Long userId);
 }

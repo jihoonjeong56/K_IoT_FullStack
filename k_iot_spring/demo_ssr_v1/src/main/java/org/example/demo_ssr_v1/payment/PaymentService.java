@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -154,5 +155,11 @@ public class PaymentService {
         } catch (Exception e) {
             throw new Exception400("포트원 인증 실패: 관리자 설정을 확인하세요");
         }
+    }
+
+    public List<PaymentResponse.ListDTO> 결제내역조회(Long userId) {
+        List<Payment> paymentList = paymentRepository.findAllByUserId(userId);
+        return paymentList.stream()
+                .map(PaymentResponse.ListDTO::new).toList();
     }
 }

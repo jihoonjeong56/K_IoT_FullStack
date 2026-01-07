@@ -4,10 +4,11 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.Data;
 import org.example.demo_ssr_v1._core.errors.exception.Exception400;
+import org.example.demo_ssr_v1._core.utils.MyDateUtil;
 
 public class PaymentResponse {
     @Data
-    public static class PrepareDTO{
+    public static class PrepareDTO {
         private String merchantUid;
         private Integer amount;
         private String impKey; // 포트원 RestAPI 키
@@ -22,7 +23,7 @@ public class PaymentResponse {
 
     // 결제 응답 DTO - JS 로 내려줄 데이터
     @Data
-    public static class VerifyDTO{
+    public static class VerifyDTO {
         private Integer amount;
         private Integer currentPoint;
 
@@ -34,7 +35,7 @@ public class PaymentResponse {
 
     //포트원 엑세스 토큰 응답 DTO 설계
     @Data
-    public static class PortOneTokenResponse{
+    public static class PortOneTokenResponse {
         private int code;
         private String message;
         // 중첩 객체를 설계해야함
@@ -42,7 +43,7 @@ public class PaymentResponse {
 
         @Data
         @JsonNaming(value = PropertyNamingStrategies.SnakeCaseStrategy.class)
-        public static class ResponseDate{
+        public static class ResponseDate {
             private String accessToken;
             private int now;
             private int expiredAt;
@@ -51,20 +52,45 @@ public class PaymentResponse {
 
     // 포트원 결제 조회 응답 DTO
     @Data
-    public static class PortOnePaymentResponse{
+    public static class PortOnePaymentResponse {
         private int code;
         private String message;
         private PaymentData response;
 
         @Data
         @JsonNaming(value = PropertyNamingStrategies.SnakeCaseStrategy.class)
-        public static class PaymentData{
+        public static class PaymentData {
             private int amount;
             private String impUid;
             private String merchantUid;
             private String status;
             private Long paidAt;
 
+        }
+    }
+
+    @Data
+    public static class ListDTO {
+        private Long id;
+        private String merchantUid;
+        private String impUid;
+        private String paidAt;
+        private String status;
+        private Integer amount;
+
+
+        public ListDTO(Payment payment) {
+            this.id = payment.getId();
+            this.merchantUid = payment.getMerchantUid();
+            this.impUid = payment.getImpUid();
+            if (payment.getCreatedAt() != null) {
+                this.paidAt = MyDateUtil.timestampFormat(payment.getCreatedAt());
+            }
+            this.amount = payment.getAmount();
+            if (payment.getStatus().contains("paid")) {
+                this.status = "결제완료";
+
+            }
         }
     }
 }

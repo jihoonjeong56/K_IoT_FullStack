@@ -21,9 +21,16 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
 
     @Query("""
-           SELECT p FROM Payment p
-           WHERE p.user.id = :userId         
-           ORDER BY p.createdAt DESC         
-        """)
+               SELECT p FROM Payment p
+               WHERE p.user.id = :userId         
+               ORDER BY p.createdAt DESC         
+            """)
     List<Payment> findAllByUserId(@Param("userId") Long userId);
+
+    @Query("""
+            SELECT p FROM Payment p
+            JOIN FETCH p.user u
+            WHERE p.id = :id
+            """)
+    Payment findByIdWithUser(@Param("id") Long paymentId);
 }

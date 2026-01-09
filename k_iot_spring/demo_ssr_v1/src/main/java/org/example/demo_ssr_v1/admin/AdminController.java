@@ -17,4 +17,13 @@ public class AdminController {
         model.addAttribute("user", sessionUser);
         return "admin/dashboard";
     }
+
+    @GetMapping("/admin/refund/list")
+    public String refundManagement(Model model) {
+
+        // 서비스에게 데이터 요청
+        // 화면에 뿌려 줌...
+
+        return "admin/admin-refund-list";
+    }
 }

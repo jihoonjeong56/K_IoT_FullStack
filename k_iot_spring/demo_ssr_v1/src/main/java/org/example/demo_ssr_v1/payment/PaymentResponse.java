@@ -1,17 +1,18 @@
 package org.example.demo_ssr_v1.payment;
 
+
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.Data;
 import org.example.demo_ssr_v1._core.utils.MyDateUtil;
 
 public class PaymentResponse {
+
     @Data
     public static class PrepareDTO {
-        private String merchantUid;
-        private Integer amount;
-        private String impKey; // 포트원 RestAPI 키
-
+        private String merchantUid; // 생성된 우리 서버 주문 번호
+        private Integer amount;  // 결제 금액
+        private String impKey; // 포트원 RESET API 키 (필수)
 
         public PrepareDTO(String merchantUid, Integer amount, String impKey) {
             this.merchantUid = merchantUid;
@@ -20,7 +21,7 @@ public class PaymentResponse {
         }
     }
 
-    // 결제 응답 DTO - JS 로 내려줄 데이터
+    // 결제 검증 응답 DTO - JS로 내려줄 데이터
     @Data
     public static class VerifyDTO {
         private Integer amount;
@@ -32,24 +33,25 @@ public class PaymentResponse {
         }
     }
 
-    //포트원 엑세스 토큰 응답 DTO 설계
+
+    // 포트원 액세스 토큰 응답 DTO 설계
     @Data
     public static class PortOneTokenResponse {
         private int code;
         private String message;
-        // 중첩 객체를 설계해야함
-        private ResponseDate response;
+        private ResponseData response;
 
         @Data
         @JsonNaming(value = PropertyNamingStrategies.SnakeCaseStrategy.class)
-        public static class ResponseDate {
+        public static class ResponseData {
+            // access_token --> @JsonNaming --> accessToken
             private String accessToken;
             private int now;
             private int expiredAt;
         }
     }
 
-    // 포트원 결제 조회 응답 DTO
+    //포트원 결제(포트원 서버에 DB 저장되어 있음) 조회 응답 DTO
     @Data
     public static class PortOnePaymentResponse {
         private int code;
@@ -59,25 +61,27 @@ public class PaymentResponse {
         @Data
         @JsonNaming(value = PropertyNamingStrategies.SnakeCaseStrategy.class)
         public static class PaymentData {
-            private int amount;
+            private Integer amount;
             private String impUid;
             private String merchantUid;
             private String status;
             private Long paidAt;
-
         }
     }
 
+    // 결제 내역 리스트 응답 DTO
     @Data
     public static class ListDTO {
         private Long id;
-        private String merchantUid;
-        private String impUid;
-        private String paidAt;
-        private String status;
+        private String impUid;  // 포트원 결제 고유 번호
+        private String merchantUid; // 주문번호
         private Integer amount;
-        private Boolean isRefundable; // 환불 가능 여부(화면에 표시여부)
+        private String paidAt;
+        // 화면에 보여질 상태 표시명
+        private String status;
+        private String statusDisplay;
 
+        private Boolean isRefundable; // 환불 가능 여부 (화면에 표시 여부)
 
         public ListDTO(Payment payment, Boolean isRefundable) {
             this.id = payment.getId();
@@ -89,9 +93,9 @@ public class PaymentResponse {
 
             // 상태 표시명 변환
             if ("paid".equals(payment.getStatus())) {
-                this.status = "결제완료";
+                this.statusDisplay = "결제완료";
             } else {
-                this.status = "환불완료";
+                this.statusDisplay = "환불완료";
             }
 
             // 날자 포멧팅
@@ -101,6 +105,7 @@ public class PaymentResponse {
         }
 
         public ListDTO(Payment payment) {
+            //  [] ,  *(true, false)
             this(payment, "paid".equals(payment.getStatus()));
         }
     }

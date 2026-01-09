@@ -7,20 +7,20 @@ public class RefundRequest {
 
     @Data
     public static class RequestDTO {
+
         private Long paymentId;
         private String reason;
 
         public void validate() {
             if (paymentId == null) {
-                throw new Exception400("결제 아이디는 필수");
+                throw new Exception400("결제 ID는 필수 입니다");
             }
-            if (reason == null || reason.trim().isEmpty()) {
-                throw new Exception400("환불상유 필수");
+            if(reason == null || reason.trim().isEmpty()) {
+                throw new Exception400("환불 사유는 필수 입니다");
             }
-            if (reason.length() > 500) {
-                throw new Exception400("환불사유는 500 자 이하");
+            if(reason.length() > 500) {
+                throw new Exception400("환불 사유는 500자 이하여하 합니다");
             }
         }
-
     }
 }

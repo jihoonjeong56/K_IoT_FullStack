@@ -8,29 +8,30 @@ import java.util.List;
 import java.util.Optional;
 
 public interface PaymentRepository extends JpaRepository<Payment, Long> {
-    // 기본적인 CRUD 만들어진 상태 ..
 
-    // imp_uid로 결제 내역 조회
-    // 포트원 결제 번호로  Payment 정보 조회 쿼리 자동 생성됩;
+    // 포트원 결제 번호로 Payment 정보 조회
     Optional<Payment> findByImpUid(String impUid);
 
-    Optional<Payment> findByMerchantUid(String merchantUid);
+    // 우리 서버 주문번호로 정보 조회
+    Optional<Payment> findByMerchantUid(String impUid);
 
+    // 우리 서버 주문번호로 조회 - 중복 주문 번호 확인 용 (T,F)
     @Query("SELECT COUNT(p) > 0 FROM Payment p WHERE p.merchantUid = :merchantUid")
     boolean existsByMerchantUid(@Param("merchantUid") String merchantUid);
 
-
+    // 사용자별 결제 내역 조회 (최신순)
     @Query("""
-               SELECT p FROM Payment p
-               WHERE p.user.id = :userId         
-               ORDER BY p.createdAt DESC         
-            """)
+           SELECT p FROM Payment p
+           WHERE p.user.id = :userId         
+           ORDER BY p.createdAt DESC         
+        """)
     List<Payment> findAllByUserId(@Param("userId") Long userId);
 
+
     @Query("""
-            SELECT p FROM Payment p
-            JOIN FETCH p.user u
-            WHERE p.id = :id
-            """)
+          SELECT p from Payment p
+          JOIN FETCH p.user u
+          WHERE p.id = :id
+    """)
     Payment findByIdWithUser(@Param("id") Long paymentId);
 }

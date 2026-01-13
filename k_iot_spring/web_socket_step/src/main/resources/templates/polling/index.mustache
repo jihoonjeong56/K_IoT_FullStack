@@ -73,6 +73,7 @@
             border-top-left-radius: 0;
             font-size: 14px;
             max-width: 80%;
+            white-space: pre-wrap;
         }
 
         .input-area {
@@ -116,24 +117,19 @@
 
     <div class="chat-box" id="chatBox">
         <!-- 반복 시작 -->
-        <div class="msg-wrap">
-            <div class="msg-box">
-                <span class="name">홍길동</span>
-                <span class="msg">반가워</span>
+        {{#chatList}}
+            <div class="msg-wrap">
+                <div class="msg-box">
+                    <span class="name">sender</span>
+                    <span class="msg">message</span>
+                </div>
             </div>
-        </div>
-
+        {{/chatList}}
         <!--반복 종료-->
-        <div class="msg-wrap">
-            <div class="msg-box">
-                <span class="name">이순신</span>
-                <span class="msg">ㅁ니아러;</span>
-            </div>
-        </div>
-        <!--디자인 확인용-->
+
     </div>
 
-    <form action="/chat/list" method="post" class="input-area">
+    <form action="/chat" method="post" class="input-area">
         <input type="text" name="sender" value="익명" class="input-sender" required>
         <input type="text" name="message" placeholder="내용을 입력" class="input-msg" autofocus>
         <button type="submit" class="btn-send">전송</button>
@@ -141,5 +137,14 @@
 
 
 </div>
+<script>
+    /* 3초마다 서버에 새로운 데이터가 있나 요청하는 방식*/
+    // 1. 화면에 스크롤 바닥 고정
+    const chatBox = document.getElementById("chatBox");
+    chatBox.scrollTop = chatBox.scrollHeight;
+    setTimeout(() => {
+        location.reload();
+    }, 3000);
+</script>
 </body>
 </html>
